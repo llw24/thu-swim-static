@@ -20,7 +20,7 @@ export default function HomeView({
 }) {
   const [idx, setIdx] = useState(0);
   const [heroIdx, setHeroIdx] = useState(0);
-  const HERO_IMAGES = ['/hero/1.jpg', '/hero/2.jpg', '/hero/3.jpg', '/hero/4.jpg'];
+  const HERO_IMAGES = ['/hero/1.webp', '/hero/2.webp', '/hero/3.webp', '/hero/4.webp'];
   const t = useT();
 
   useEffect(() => {

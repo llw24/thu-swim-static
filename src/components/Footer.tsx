@@ -40,7 +40,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
         </div>
         <div className="footer-bot" style={{ borderTop:'1px solid rgba(255,255,255,.08)', marginTop:40, paddingTop:24, display:'flex', justifyContent:'space-between', color:'#64748b', fontSize:12, gap:12, flexWrap:'wrap' }}>
           <div>© {new Date().getFullYear()} {t('清华大学学生游泳协会', 'Tsinghua University Student Swimming Association')}</div>
-          <div>Made with 💧 in Beijing</div>
+          <div>Made with 💧 in Beijing · <Link href="/admin" style={{ color:'inherit' }}>管理</Link></div>
         </div>
       </div>
     </footer>
