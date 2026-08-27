@@ -1,8 +1,8 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useT } from '@/lib/i18n';
+import { withBase } from '@/lib/content-shared';
 import type { NewsItem, SessionItem } from '@/lib/content-shared';
 
 /**
@@ -41,7 +41,13 @@ export default function HomeView({
       <section className="hero-bg" style={{ position:'relative', marginTop:-100, paddingTop:130, paddingBottom:60, overflow:'hidden', marginBottom:40 }}>
         {HERO_IMAGES.map((src, i) => (
           <div key={src} aria-hidden style={{ position:'absolute', inset:0, opacity:i === heroIdx ? 1 : 0, transition:'opacity 1.2s ease-in-out' }}>
-            <Image src={src} alt="" fill priority={i === 0} sizes="100vw" style={{ objectFit:'cover', objectPosition:'center' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={withBase(src)}
+              alt=""
+              loading={i === 0 ? 'eager' : 'lazy'}
+              style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center' }}
+            />
           </div>
         ))}
         <div aria-hidden className="hero-overlay" style={{ position:'absolute', inset:0, background:'linear-gradient(rgba(15,32,52,0.55), rgba(15,32,52,0.35))' }} />
