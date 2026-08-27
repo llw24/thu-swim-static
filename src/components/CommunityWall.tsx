@@ -1,0 +1,92 @@
+'use client';
+import { useState } from 'react';
+import { useT, useLang } from '@/lib/i18n';
+import GiscusComments from './GiscusComments';
+import { withBase, WALL_CATEGORIES } from '@/lib/content-shared';
+import type {
+  WallItem,
+  WallCategory,
+  SiteSettings,
+} from '@/lib/content-shared';
+
+/**
+ * 社区页（校园墙）—— 三块结构：
+ *  ① 微信群入口（二维码来自 site.json）
+ *  ② 内容墙（content/wall/*.md 的精选外链卡片）
+ *  ③ Giscus 留言板（GitHub Discussions，配置后自动启用）
+ */
+export default function CommunityWall({ wall, site }: { wall: WallItem[]; site: SiteSettings }) {
+  const t = useT();
+  const { lang } = useLang();
+  const [cat, setCat] = useState<WallCategory | 'all'>('all');
+  const shown = cat === 'all' ? wall : wall.filter((w) => w.category === cat);
+
+  return (
+    <main className="container" style={{ padding:'110px 24px 60px', maxWidth:900 }}>
+      <p className="eyebrow" style={{ marginBottom:10 }}>Community</p>
+      <h1 className="serif" style={{ fontSize:36, fontWeight:400, marginBottom:28 }}>
+        {t('游泳社区 · 校园墙', 'Swim Community · Campus Wall')}
+      </h1>
+
+      {/* ① 微信群入口 */}
+      <div className="card" style={{ padding:28, marginBottom:32, display:'flex', gap:24, alignItems:'center', flexWrap:'wrap' }}>
+        {site.wechatGroupQr && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={withBase(site.wechatGroupQr)}
+            alt={t('微信群二维码', 'WeChat group QR')}
+            style={{ width:150, height:150, objectFit:'contain', borderRadius:10, border:'1px solid var(--line)' }}
+          />
+        )}
+        <div style={{ flex:1, minWidth:240 }}>
+          <h2 className="serif" style={{ fontSize:22, fontWeight:500, marginBottom:8 }}>{t('加入协会微信群', 'Join our WeChat group')}</h2>
+          <p style={{ color:'#555', lineHeight:1.8, fontSize:14.5 }}>{lang === 'en' ? site.communityIntroEn : site.communityIntroZh}</p>
+          {site.contactWechat && (
+            <p style={{ color:'var(--muted)', fontSize:13, marginTop:10 }}>微信 / WeChat：{site.contactWechat}</p>
+          )}
+        </div>
+      </div>
+
+      {/* ② 内容墙 */}
+      <h2 className="serif" style={{ fontSize:26, fontWeight:400, marginBottom:16 }}>{t('内容墙 · 精选', 'Highlights')}</h2>
+      <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap' }}>
+        <Chip active={cat==='all'} onClick={()=>setCat('all')}>{t('全部', 'All')}</Chip>
+        {(Object.keys(WALL_CATEGORIES) as WallCategory[]).map((k) => (
+          <Chip key={k} active={cat===k} onClick={()=>setCat(k)}>
+            {lang === 'en' ? WALL_CATEGORIES[k].en : WALL_CATEGORIES[k].zh}
+          </Chip>
+        ))}
+      </div>
+      {shown.length === 0 ? (
+        <div className="card" style={{ padding:40, color:'var(--muted)', marginBottom:32 }}>
+          {t('这里还没有内容。管理员发现好文章/视频后会贴到这里。', 'Nothing here yet — admins will post selected articles and videos.')}
+        </div>
+      ) : (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:16, marginBottom:32 }}>
+          {shown.map((w) => (
+            <a key={w.slug} href={w.url} target="_blank" rel="noopener noreferrer" className="card" style={{ padding:20, textDecoration:'none', color:'inherit' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+                <span style={{ fontSize:26 }}>{w.emoji}</span>
+                <span className="chip chip-neutral">{lang === 'en' ? WALL_CATEGORIES[w.category].en : WALL_CATEGORIES[w.category].zh}</span>
+              </div>
+              <h3 className="serif" style={{ fontSize:17, fontWeight:500, marginBottom:6 }}>{w.title} ↗</h3>
+              {w.summary && <p style={{ color:'#555', lineHeight:1.6, fontSize:14 }}>{w.summary}</p>}
+              <div style={{ fontSize:12, color:'var(--muted)', marginTop:10 }}>{w.date}</div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* ③ 留言板 */}
+      <GiscusComments giscus={site.giscus} />
+    </main>
+  );
+}
+
+function Chip({ active, onClick, children }: any) {
+  return (
+    <button onClick={onClick} className={`chip ${active ? 'chip-open' : 'chip-neutral'}`} style={{ cursor:'pointer', padding:'6px 16px', fontSize:14, background:active?'var(--ink)':'white', color:active?'white':'#333', border:'1px solid var(--line)' }}>
+      {children}
+    </button>
+  );
+}

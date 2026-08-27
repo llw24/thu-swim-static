@@ -1,0 +1,13 @@
+node_modules/
+.next/
+data/
+*.db*
+.env
+.env.local
+.DS_Store
+/tmp
+.vercel
+.env*
+tsconfig.tsbuildinfo
+out/
+node_modules/

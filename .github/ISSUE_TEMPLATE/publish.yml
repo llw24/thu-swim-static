@@ -1,0 +1,127 @@
+name: 📝 发布内容
+description: 填表发布新闻 / 课程 / 教练 / 社区墙内容，机器人自动更新网站
+labels: ["发布"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 内容类型
+      options: [新闻, 课程, 教练, 社区墙]
+    validations: { required: true }
+
+  - type: input
+    id: title
+    attributes:
+      label: 标题
+      description: 新闻/课程的标题，或教练的姓名
+      placeholder: 如：2026 马约翰杯游泳赛报名开始
+    validations: { required: true }
+
+  - type: input
+    id: date
+    attributes:
+      label: 日期
+      description: 格式 YYYY-MM-DD，留空则用今天（课程类型忽略此字段）
+      placeholder: "2026-07-25"
+    validations: { required: false }
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 摘要
+      description: 一两句话简介，显示在列表卡片上（选填）
+    validations: { required: false }
+
+  - type: checkboxes
+    id: pinned
+    attributes:
+      label: 置顶
+      description: 仅对「新闻」生效：勾选后这条动态会排在最前并常驻首页轮播首位
+      options:
+        - label: 置顶显示
+
+  - type: input
+    id: emoji
+    attributes:
+      label: 表情符号
+      description: 显示在标题上方的小图标（选填，默认 💧）
+      placeholder: 🎉 / 📰 / 🏊‍♀️ …
+    validations: { required: false }
+
+  - type: textarea
+    id: body
+    attributes:
+      label: 正文
+      description: 支持 Markdown。新闻=正文；课程=详细说明；教练=个人介绍；社区墙可留空
+    validations: { required: true }
+
+  - type: input
+    id: registerUrl
+    attributes:
+      label: 报名表单链接（仅课程）
+      placeholder: https://docs.qq.com/form/page/xxxxx
+    validations: { required: false }
+
+  - type: input
+    id: schedule
+    attributes:
+      label: 上课时间（仅课程）
+      placeholder: 每周二 / 周四晚 19:00–20:30
+    validations: { required: false }
+
+  - type: input
+    id: location
+    attributes:
+      label: 上课地点（仅课程）
+      placeholder: 陈明游泳馆
+    validations: { required: false }
+
+  - type: input
+    id: price
+    attributes:
+      label: 费用（仅课程）
+      placeholder: 200 元 / 人
+    validations: { required: false }
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: 课程状态（仅课程）
+      options: [报名中, 名额已满, 已结束]
+    validations: { required: false }
+
+  - type: input
+    id: specialties
+    attributes:
+      label: 擅长泳姿（仅教练）
+      placeholder: 蛙泳 / 自由泳 / 转身技术
+    validations: { required: false }
+
+  - type: input
+    id: availability
+    attributes:
+      label: 可授课时间（仅教练）
+      placeholder: 周末全天
+    validations: { required: false }
+
+  - type: input
+    id: coachContact
+    attributes:
+      label: 联系方式（仅教练）
+      placeholder: 通过协会联系 / 微信号 xxx
+    validations: { required: false }
+
+  - type: input
+    id: url
+    attributes:
+      label: 链接地址（仅社区墙）
+      description: 要推荐的文章/视频链接
+      placeholder: https://mp.weixin.qq.com/s/xxxxx
+    validations: { required: false }
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 内容分类（仅社区墙）
+      options: [分享, 求助, 约游]
+    validations: { required: false }

@@ -1,0 +1,57 @@
+name: 发布内容（Issue → 网站）
+
+# 带有「发布」标签的 Issue 会被机器人转成 content/ 下的内容文件，
+# 推送后自动触发 Pages 部署。
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publish:
+    if: contains(github.event.issue.labels.*.name, '发布')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 确保「发布」标签存在
+        run: gh label create "发布" --color 0E8A16 --force
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 解析 Issue 并写入内容文件
+        id: convert
+        run: node scripts/issue-to-content.mjs
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+
+      - name: 提交并推送
+        run: |
+          git config user.name "tssa-bot"
+          git config user.email "41898282+tssa-bot@users.noreply.github.com"
+          git add content/
+          if git diff --cached --quiet; then
+            echo "::notice::没有产生内容变更"
+            exit 0
+          fi
+          git commit -m "发布(#${{ github.event.issue.number }})：${{ github.event.issue.title }}"
+          git push
+
+      - name: 关闭 Issue 并留言
+        if: always()
+        run: |
+          gh issue close "$ISSUE_NUMBER" \
+            --comment "✅ 已发布！生成文件：\`$FILE_PATH\`。网站将在几分钟后自动更新。" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          FILE_PATH: ${{ steps.convert.outputs.file_path }}

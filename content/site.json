@@ -1,0 +1,16 @@
+{
+  "announcement": "欢迎来到清华大学学生游泳协会官方网站！秋季零基础班报名即将开始，敬请关注。",
+  "contactEmail": "llw24@mails.tsinghua.edu.cn",
+  "contactWechat": "",
+  "wechatGroupQr": "/uploads/wechat-group-qr.png",
+  "communityIntroZh": "想约游、求助、交流技术？先进协会微信群：扫码进群，或联系任意理事会成员拉你进群。",
+  "communityIntroEn": "For meetups, questions and chat, join our WeChat group: scan the QR code below, or ask any board member to add you.",
+  "coachRequestUrl": "",
+  "coachApplyUrl": "",
+  "giscus": {
+    "repo": "",
+    "repoId": "",
+    "category": "",
+    "categoryId": ""
+  }
+}
