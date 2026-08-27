@@ -15,6 +15,7 @@ const API = `https://api.github.com/repos/${REPO}/contents`;
 const LS_KEY = 'tssa_admin_token';
 
 type Module = 'news' | 'sessions';
+type Tab = Module | 'settings';
 
 type FileMeta = { name: string; path: string; sha: string };
 type Fields = Record<string, string>;
@@ -59,6 +60,20 @@ const SCHEMA: Record<Module, {
   },
 };
 
+// ---------------------------------------------------- 站点设置（site.json）
+
+/** content/site.json 中开放给管理员编辑的字段 */
+const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: string }[] = [
+  { key: 'announcement', zh: '首页公告横幅 📢', type: 'textarea', hint: '留空则首页不显示横幅' },
+  { key: 'contactEmail', zh: '联系邮箱（页脚）', type: 'text' },
+  { key: 'contactWechat', zh: '微信号（页脚 + 社区页）', type: 'text' },
+  { key: 'wechatGroupQr', zh: '微信群二维码图片路径', type: 'text', hint: '如 /uploads/group.png；图片先上传到仓库 public/uploads/ 里' },
+  { key: 'communityIntroZh', zh: '社区页介绍 · 中文', type: 'textarea' },
+  { key: 'communityIntroEn', zh: '社区页介绍 · 英文', type: 'textarea' },
+  { key: 'coachRequestUrl', zh: '“我要找教练”表单链接', type: 'text', hint: '留空则显示加微信引导' },
+  { key: 'coachApplyUrl', zh: '教练入驻申请表单链接', type: 'text', hint: '留空则显示加微信引导' },
+];
+
 // ---------------------------------------------------------- 前置元数据解析
 
 function parseFront(text: string): { data: Fields; body: string } {
@@ -100,7 +115,7 @@ export default function AdminView() {
   const [token, setToken] = useState('');
   const [loginState, setLoginState] = useState<'checking' | 'ok' | 'none'>('none');
   const [user, setUser] = useState('');
-  const [tab, setTab] = useState<Module>('news');
+  const [tab, setTab] = useState<Tab>('news');
 
   useEffect(() => {
     const saved = localStorage.getItem(LS_KEY) || '';
@@ -150,11 +165,58 @@ export default function AdminView() {
   async function refreshAll(tok: string) {
     setLoading(true);
     try {
-      await Promise.all([loadList(tok, 'news'), loadList(tok, 'sessions')]);
+      await Promise.all([loadList(tok, 'news'), loadList(tok, 'sessions'), loadSite(tok)]);
     } catch (e: any) {
       alert(e.message || '加载失败');
     }
     setLoading(false);
+  }
+
+  // --------------------------------------------------------- 站点设置状态
+
+  const [siteData, setSiteData] = useState<Fields>({});
+  const [siteRawRef, setSiteRawRef] = useState<Record<string, any>>({});
+  const [siteSha, setSiteSha] = useState('');
+
+  async function loadSite(tok: string) {
+    const r = await fetch(`${API}/content/site.json?ref=main`, {
+      headers: { Authorization: `Bearer ${tok}`, Accept: 'application/vnd.github+json' },
+    });
+    if (!r.ok) throw new Error(`读取站点设置失败（HTTP ${r.status}）`);
+    const d = await r.json();
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+    setSiteSha(d.sha);
+    setSiteRawRef(parsed);
+    setSiteData(Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(parsed[f.key] ?? '')])));
+  }
+
+  async function saveSite() {
+    if (!token) return;
+    setBusy(true);
+    try {
+      // giscus 等技术字段原样保留，只覆盖管理员的这批字段
+      const merged = { ...siteRawRef };
+      for (const f of SITE_FIELDS) {
+        (merged as any)[f.key] = siteData[f.key] ?? '';
+      }
+      const text = JSON.stringify(merged, null, 2) + '\n';
+      const r = await fetch(`${API}/content/site.json`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+        body: JSON.stringify({
+          message: '后台设置：更新全站设置',
+          content: utf8ToBase64(text),
+          sha: siteSha,
+          branch: 'main',
+        }),
+      });
+      if (!r.ok) throw new Error(`保存失败 HTTP ${r.status}: ${JSON.stringify(await r.json()).slice(0, 200)}`);
+      alert('✅ 已保存！网站将在 2~5 分钟内自动更新。');
+      await loadSite(token);
+    } catch (e: any) {
+      alert(e.message || '保存失败');
+    }
+    setBusy(false);
   }
 
   // ------------------------------------------------------------- 编辑器
@@ -279,8 +341,6 @@ export default function AdminView() {
     );
   }
 
-  const cur = SCHEMA[tab];
-
   return (
     <main className="container" style={{ padding:'110px 24px 60px', maxWidth:900 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
@@ -291,22 +351,54 @@ export default function AdminView() {
         </span>
       </div>
 
-      <div style={{ display:'flex', gap:8, margin:'18px 0 22px' }}>
+      <div style={{ display:'flex', gap:8, margin:'18px 0 22px', flexWrap:'wrap' }}>
         {(Object.keys(SCHEMA) as Module[]).map((m) => (
           <button key={m} onClick={()=>setTab(m)} className="chip" style={{
             cursor:'pointer', padding:'8px 20px', fontSize:14,
             background: tab===m?'var(--ink)':'white', color: tab===m?'white':'#333', border:'1px solid var(--line)',
           }}>{SCHEMA[m].label}</button>
         ))}
-        <div style={{ flex:1 }} />
-        <button className="btn-primary" onClick={()=>openNew(tab)}>＋ 新增{cur.label}</button>
+        <button onClick={()=>setTab('settings')} className="chip" style={{
+          cursor:'pointer', padding:'8px 20px', fontSize:14,
+          background: tab==='settings'?'var(--ink)':'white', color: tab==='settings'?'white':'#333', border:'1px solid var(--line)',
+        }}>⚙️ 站点设置</button>
+        {tab !== 'settings' && (
+          <>
+            <div style={{ flex:1 }} />
+            <button className="btn-primary" onClick={()=>openNew(tab)}>＋ 新增{SCHEMA[tab as Module].label}</button>
+          </>
+        )}
       </div>
+
+      {/* ------------------------------------------------ 站点设置视图 */}
+      {!loading && tab === 'settings' && (
+        <div className="card" style={styleCard}>
+          <h2 style={{ fontSize:20, fontWeight:600, marginBottom:16 }}>⚙️ 全站设置</h2>
+          <p style={{ color:'#666', fontSize:13, lineHeight:1.7, marginBottom:8 }}>
+            这里的内容全站生效（首页公告、页脚联系方式、社区页介绍等）。
+          </p>
+          {SITE_FIELDS.map((f) => (
+            <label key={f.key} className="label" style={{ display:'block', marginTop:12 }}>
+              {f.zh}
+              {f.hint && <span style={{ color:'var(--muted)', fontWeight:400 }}> · {f.hint}</span>}
+              {f.type === 'textarea' ? (
+                <textarea className="input" rows={3} value={siteData[f.key]||''} onChange={(e)=>setSiteData({...siteData, [f.key]:e.target.value})} />
+              ) : (
+                <input className="input" value={siteData[f.key]||''} onChange={(e)=>setSiteData({...siteData, [f.key]:e.target.value})} />
+              )}
+            </label>
+          ))}
+          <div style={{ display:'flex', gap:12, marginTop:18 }}>
+            <button className="btn-primary" disabled={busy} onClick={saveSite}>{busy?'保存中…':'保存并发布'}</button>
+          </div>
+        </div>
+      )}
 
       {loading && <p style={{ color:'var(--muted)' }}>加载中…</p>}
 
-      {!loading && !editing && (
+      {!loading && !editing && tab !== 'settings' && (
         <div className="card" style={{ padding:12 }}>
-          {lists[tab].length === 0 && <p style={{ padding:20, color:'var(--muted)' }}>还没有{cur.label}。</p>}
+          {lists[tab].length === 0 && <p style={{ padding:20, color:'var(--muted)' }}>还没有{SCHEMA[tab].label}。</p>}
           {lists[tab].map((f) => (
             <div key={f.path} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', borderBottom:'1px solid var(--line)' }}>
               <span style={{ flex:1, fontSize:14 }}>{f.name}</span>
