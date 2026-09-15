@@ -43,7 +43,6 @@ src/
 |---|---|
 | `deploy-pages.yml` | 每次 push 到 main 自动构建并发布到 GitHub Pages |
 | `publish-content.yml` | 带「发布」标签的 Issue 自动转成 content 文件 |
-| `weekly-report.yml` | 每周一 09:00 向管理员邮箱发送内容变更汇总（需配 SMTP secrets，**当前未配、处于失败状态**） |
 
 ## 本地开发
 
@@ -67,4 +66,3 @@ NEXT_PUBLIC_BASE_PATH=/thu-swim-static SITE_URL=https://llw24.github.io/thu-swim
 | `NEXT_PUBLIC_COZE_BOT_ID` | Coze AI 助手 bot id（可选，不设则不显示悬浮窗） |
 | `NEXT_PUBLIC_JOIN_API` | 验证服务地址（默认 `https://thu-swim.netlify.app`，可不配） |
 
-周报邮件还需仓库 secrets：`SMTP_USER` / `SMTP_PASS`（Brevo SMTP）、`ADMIN_EMAIL`。
