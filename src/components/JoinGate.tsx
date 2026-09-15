@@ -112,7 +112,7 @@ export default function JoinGate({
                   '开放后回到「活动报名」页点击报名即可，无需再验证。也可以先加入社群等通知：',
                   'Come back to the sign-up page when it opens — no need to verify again. Or join the group to get notified:',
                 )}{' '}
-                <a href="/join/" className="link-arrow">{t('加入社群 →', 'Join the group →')}</a>
+                <a href={withBase('/join/')} className="link-arrow">{t('加入社群 →', 'Join the group →')}</a>
               </p>
             </>
           )}

@@ -92,7 +92,7 @@ function SessionCard({ session: s, t }: { session: SessionItem; t: (zh: string, 
             {t('立即报名 →', 'Register now →')}
           </a>
         ) : (
-          <a href={`/verify/?next=signup`} className="btn-primary" style={{ display:'inline-block', textDecoration:'none' }}>
+          <a href={withBase('/verify/?next=signup')} className="btn-primary" style={{ display:'inline-block', textDecoration:'none' }}>
             {s.status === 'full' ? t('登记候补 →', 'Join waitlist →') : t('立即报名 →', 'Register now →')}
           </a>
         )}
