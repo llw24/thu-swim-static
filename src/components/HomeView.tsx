@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useT } from '@/lib/i18n';
 import { withBase } from '@/lib/content-shared';
 import type { NewsItem } from '@/lib/content-shared';
@@ -21,14 +21,19 @@ export default function HomeView({
   const HERO_IMAGES = ['/hero/1.webp', '/hero/2.webp', '/hero/3.webp', '/hero/4.webp'];
   const t = useT();
 
-  // 置顶动态同步到首页横幅（news 已按 置顶优先 + 日期 排序）
-  const pinnedNews = news.find((n) => n.pinned) ?? null;
+  // 右侧卡片同步置顶动态：只显示置顶的；没有置顶时显示最新一条
+  const heroNews = useMemo(() => {
+    const pinned = news.filter((n) => n.pinned);
+    return pinned.length > 0 ? pinned : news.slice(0, 1);
+  }, [news]);
+  // 轮播索引对卡片列表取模，避免列表变化后 idx 越界导致卡片空白
+  const safeIdx = heroNews.length ? idx % heroNews.length : 0;
 
   useEffect(() => {
-    if (news.length < 2) return;
-    const tm = setInterval(() => setIdx((i) => (i + 1) % news.length), 5000);
+    if (heroNews.length < 2) return;
+    const tm = setInterval(() => setIdx((i) => (i + 1) % heroNews.length), 5000);
     return () => clearInterval(tm);
-  }, [news.length]);
+  }, [heroNews.length]);
 
   useEffect(() => {
     const tm = setInterval(() => setHeroIdx((i) => (i + 1) % HERO_IMAGES.length), 6000);
@@ -61,19 +66,6 @@ export default function HomeView({
         {announcement && (
           <div style={{ background:'#FFF6E0', border:'1px solid #EBD8A6', padding:'12px 18px', borderRadius:10, marginBottom:24, fontSize:14, color:'#7A5B0E' }}>📢 {announcement}</div>
         )}
-        {pinnedNews && (
-          <div style={{ background:'rgba(255,255,255,0.94)', border:'1px solid var(--line)', padding:'12px 18px', borderRadius:10, marginBottom:24, fontSize:14, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
-            <span className="chip chip-open" style={{ fontSize:12, flexShrink:0 }}>置顶</span>
-            <Link
-              href={pinnedNews.url || `/news/${pinnedNews.slug}`}
-              target={pinnedNews.url ? '_blank' : undefined}
-              rel={pinnedNews.url ? 'noopener noreferrer' : undefined}
-              style={{ color:'var(--ink)', textDecoration:'none', fontWeight:500 }}
-            >
-              {pinnedNews.title} →
-            </Link>
-          </div>
-        )}
         <div className="hero-grid" style={{ display:'grid', gridTemplateColumns:'1.15fr 1fr', gap:48, alignItems:'stretch', marginBottom:0 }}>
           <div style={{ display:'flex', flexDirection:'column', justifyContent:'center' }}>
             <p className="eyebrow hero-eyebrow" style={{ marginBottom:20 }}>Tsinghua Swimming Association</p>
@@ -100,16 +92,16 @@ export default function HomeView({
 
           <div className="card" style={{ overflow:'hidden', display:'flex', flexDirection:'column' }}>
             <div style={{ padding:'20px 24px 12px', borderBottom:'1px solid var(--line)' }}>
-              <span className="eyebrow">{t('最新动态', 'Latest')} · News</span>
+              <span className="eyebrow">{t('置顶动态', 'Pinned')} · News</span>
             </div>
             <div className="news-stage" style={{ position:'relative', flex:1 }}>
-              {news.map((n, i) => (
+              {heroNews.map((n, i) => (
                 <Link key={n.slug} href={n.url || `/news/${n.slug}`}
                   target={n.url ? '_blank' : undefined}
                   rel={n.url ? 'noopener noreferrer' : undefined}
                   style={{
-                  position:'absolute', inset:0, opacity:i === idx ? 1 : 0,
-                  transition:'opacity .5s', pointerEvents:i === idx ? 'auto' : 'none',
+                  position:'absolute', inset:0, opacity:i === safeIdx ? 1 : 0,
+                  transition:'opacity .5s', pointerEvents:i === safeIdx ? 'auto' : 'none',
                   display:'flex', flexDirection:'column', textDecoration:'none', color:'inherit',
                 }}>
                   <div className="news-cover">{n.emoji}</div>
@@ -120,27 +112,27 @@ export default function HomeView({
                   </div>
                 </Link>
               ))}
-              {news.length === 0 && (
+              {heroNews.length === 0 && (
                 <div style={{ padding:40, color:'var(--muted)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                   {t('暂无动态，敬请期待', 'No news yet — stay tuned')}
                 </div>
               )}
             </div>
-            {news.length > 1 && (
+            {heroNews.length > 1 && (
               <>
-                <button aria-label={t('上一条', 'Previous')} className="news-nav news-nav-left" onClick={() => setIdx((i) => (i - 1 + news.length) % news.length)}>
+                <button aria-label={t('上一条', 'Previous')} className="news-nav news-nav-left" onClick={() => setIdx((i) => (i - 1 + heroNews.length) % heroNews.length)}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                 </button>
-                <button aria-label={t('下一条', 'Next')} className="news-nav news-nav-right" onClick={() => setIdx((i) => (i + 1) % news.length)}>
+                <button aria-label={t('下一条', 'Next')} className="news-nav news-nav-right" onClick={() => setIdx((i) => (i + 1) % heroNews.length)}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
               </>
             )}
             <div style={{ display:'flex', justifyContent:'center', gap:6, padding:'12px 0 20px' }}>
-              {news.map((_, i) => (
+              {heroNews.map((_, i) => (
                 <button key={i} onClick={() => setIdx(i)} style={{
-                  width:i === idx ? 20 : 6, height:6, borderRadius:3, border:0,
-                  background:i === idx ? 'var(--aqua)' : '#d5d1c4', cursor:'pointer', transition:'all .3s',
+                  width:i === safeIdx ? 20 : 6, height:6, borderRadius:3, border:0,
+                  background:i === safeIdx ? 'var(--aqua)' : '#d5d1c4', cursor:'pointer', transition:'all .3s',
                 }} />
               ))}
             </div>
