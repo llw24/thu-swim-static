@@ -3,7 +3,11 @@ import { useT } from '@/lib/i18n';
 import { withBase } from '@/lib/content-shared';
 import type { SessionItem, SessionStatus } from '@/lib/content-shared';
 
-/** 零基础班 —— 数据来自 content/sessions/*.md */
+/**
+ * 零基础班 —— 期次信息来自 content/sessions/*.md（构建时注入）。
+ * 报名走问卷星：链接不公开在页面上，点「立即报名」先做清华邮箱验证，
+ * 验证后由老站接口发放报名入口（见 /join）。
+ */
 export default function TrainingView({ sessions }: { sessions: SessionItem[] }) {
   const t = useT();
   const active = sessions.filter((s) => s.status !== 'closed');
@@ -13,10 +17,16 @@ export default function TrainingView({ sessions }: { sessions: SessionItem[] }) 
     <main className="container" style={{ padding:'110px 24px 60px' }}>
       <p className="eyebrow" style={{ marginBottom:10 }}>Beginner Class</p>
       <h1 className="serif" style={{ fontSize:36, fontWeight:400, marginBottom:12 }}>{t('零基础班', 'Beginner Class')}</h1>
-      <p style={{ color:'#444', maxWidth:720, lineHeight:1.7, marginBottom:40 }}>
+      <p style={{ color:'#444', maxWidth:720, lineHeight:1.7, marginBottom:12 }}>
         {t(
           '面向从未接触过游泳、或希望进阶的清华同学。协会每学期开设多个班次（如蛙泳班、自由泳班），由校队队员与专业教练小班执教，学期末进行独立游泳测试。',
           'For Tsinghua students who have never swum before, or want to improve. Each term we run several sections (breaststroke, freestyle, etc.) taught in small classes by team members and coaches, with a final swim test at term end.'
+        )}
+      </p>
+      <p style={{ color:'var(--muted)', maxWidth:720, lineHeight:1.7, fontSize:13.5, marginBottom:40 }}>
+        {t(
+          '报名需先用清华邮箱验证身份（一次验证，进群和报名通用）；名额有限，先到先得，满员后请联系理事会进入候补。',
+          'Sign-up requires a quick Tsinghua email verification (also covers joining the WeChat group). Seats are limited — first come, first served.',
         )}
       </p>
 
@@ -51,7 +61,7 @@ function SessionCard({ session: s, t }: { session: SessionItem; t: (zh: string, 
   const chipText = s.status === 'open'
     ? t('报名中 · 点击下方按钮报名', 'Open — register below')
     : s.status === 'full'
-      ? t('名额已满 · 可联系候补', 'Full — waitlist via contact')
+      ? t('名额已满 · 可登记候补', 'Full — join the waitlist')
       : t('暂未开放报名', 'Not open yet');
 
   return (
@@ -72,12 +82,16 @@ function SessionCard({ session: s, t }: { session: SessionItem; t: (zh: string, 
         </div>
       )}
       <div style={{ marginTop:'auto' }}>
-        {s.registerUrl && s.status !== 'closed' ? (
+        {s.status === 'closed' ? (
+          <span style={{ fontSize:14, color:'var(--muted)' }}>{t('报名尚未开始，敬请关注首页公告。', 'Registration not open yet — check the homepage announcement.')}</span>
+        ) : s.registerUrl ? (
           <a href={s.registerUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display:'inline-block', textDecoration:'none' }}>
-            {s.status === 'open' ? t('立即报名 →', 'Register now →') : t('查看详情与候补 →', 'Details & waitlist →')}
+            {t('立即报名 →', 'Register now →')}
           </a>
         ) : (
-          <span style={{ fontSize:14, color:'var(--muted)' }}>{t('报名尚未开始，敬请关注首页公告。', 'Registration not open yet — check the homepage announcement.')}</span>
+          <a href={`/join/?next=signup`} className="btn-primary" style={{ display:'inline-block', textDecoration:'none' }}>
+            {s.status === 'full' ? t('登记候补 →', 'Join waitlist →') : t('立即报名 →', 'Register now →')}
+          </a>
         )}
       </div>
     </div>

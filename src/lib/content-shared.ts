@@ -24,8 +24,32 @@ export type NewsItem = {
   summary: string;
   emoji: string;
   pinned: boolean;
+  /** 外链（公众号文章等）：有值时列表直接跳外链，而不是站内详情页 */
+  url: string;
   body: string;
 };
+
+// -------------------------------------------------------- 清华邮箱域名白名单
+
+/**
+ * 允许验证/注册的邮箱域名。
+ *
+ * ⚠️ 这里只是前端的即时反馈（输错了马上提示），**不是安全边界**。
+ *    真正的限制在服务端：supabase/schema.sql 里的
+ *    hook_restrict_signup_by_email_domain() 会在建号前拒绝其他域名。
+ *    改这个数组时务必同步改那个函数，否则会出现
+ *    "前端说可以、发信后被 Supabase 拒绝"的割裂体验。
+ */
+export const ALLOWED_EMAIL_DOMAINS = [
+  'mails.tsinghua.edu.cn',
+  'tsinghua.edu.cn',
+  'mail.tsinghua.edu.cn',
+];
+
+export function isTsinghuaEmail(email: string): boolean {
+  const domain = email.trim().toLowerCase().split('@')[1] ?? '';
+  return ALLOWED_EMAIL_DOMAINS.includes(domain);
+}
 
 // -------------------------------------------------------------- 零基础班
 
@@ -92,6 +116,9 @@ export type SiteSettings = {
   /** 社区墙顶部的微信群二维码/进群说明 */
   communityIntroZh: string;
   communityIntroEn: string;
+  /** 微信公众号（动态都发在这里，官网动态页做导流） */
+  gzhName: string;
+  gzhQr: string;
   /** 找教练表单链接（学员需求 / 教练入驻），留空则显示微信引导 */
   coachRequestUrl: string;
   coachApplyUrl: string;

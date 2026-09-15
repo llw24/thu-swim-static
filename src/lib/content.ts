@@ -62,6 +62,7 @@ export function getNews(): NewsItem[] {
       summary: String(d.front.summary ?? ''),
       emoji: String(d.front.emoji ?? '💧'),
       pinned: d.front.pinned === true,
+      url: String(d.front.url ?? ''),
       body: d.body,
     }))
     .sort(
@@ -150,6 +151,8 @@ export function getSite(): SiteSettings {
     wechatGroupQr: '',
     communityIntroZh: '',
     communityIntroEn: '',
+    gzhName: '',
+    gzhQr: '',
     coachRequestUrl: '',
     coachApplyUrl: '',
     giscus: { repo: '', repoId: '', category: '', categoryId: '' },

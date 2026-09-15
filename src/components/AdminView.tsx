@@ -67,9 +67,11 @@ const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: 
   { key: 'announcement', zh: '首页公告横幅 📢', type: 'textarea', hint: '留空则首页不显示横幅' },
   { key: 'contactEmail', zh: '联系邮箱（页脚）', type: 'text' },
   { key: 'contactWechat', zh: '微信号（页脚 + 社区页）', type: 'text' },
-  { key: 'wechatGroupQr', zh: '微信群二维码图片路径', type: 'text', hint: '如 /uploads/group.png；图片先上传到仓库 public/uploads/ 里' },
+  { key: 'wechatGroupQr', zh: '微信群二维码图片路径（仅作应急方案）', type: 'text', hint: '正常情况下进群方式在 Supabase 里的 join_info 表配置（见《管理员使用手册》）。这个字段只在 Supabase 未配置时才会被用到 —— 填了就等于对所有人公开二维码，失去邮箱验证的保护' },
   { key: 'communityIntroZh', zh: '社区页介绍 · 中文', type: 'textarea' },
   { key: 'communityIntroEn', zh: '社区页介绍 · 英文', type: 'textarea' },
+  { key: 'gzhName', zh: '微信公众号名称（动态页导流）', type: 'text' },
+  { key: 'gzhQr', zh: '公众号二维码图片路径', type: 'text', hint: '图片上传到仓库 public/uploads/ 里，如 /uploads/gzh-qr.png' },
   { key: 'coachRequestUrl', zh: '“我要找教练”表单链接', type: 'text', hint: '留空则显示加微信引导' },
   { key: 'coachApplyUrl', zh: '教练入驻申请表单链接', type: 'text', hint: '留空则显示加微信引导' },
 ];

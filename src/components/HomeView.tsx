@@ -14,7 +14,7 @@ export default function HomeView({
   session,
   announcement,
 }: {
-  news: Pick<NewsItem, 'slug' | 'title' | 'date' | 'summary' | 'emoji'>[];
+  news: Pick<NewsItem, 'slug' | 'title' | 'date' | 'summary' | 'emoji' | 'url'>[];
   session: SessionItem | null;
   announcement: string;
 }) {
@@ -92,7 +92,10 @@ export default function HomeView({
             </div>
             <div className="news-stage" style={{ position:'relative', flex:1 }}>
               {news.map((n, i) => (
-                <Link key={n.slug} href={`/news/${n.slug}`} style={{
+                <Link key={n.slug} href={n.url || `/news/${n.slug}`}
+                  target={n.url ? '_blank' : undefined}
+                  rel={n.url ? 'noopener noreferrer' : undefined}
+                  style={{
                   position:'absolute', inset:0, opacity:i === idx ? 1 : 0,
                   transition:'opacity .5s', pointerEvents:i === idx ? 'auto' : 'none',
                   display:'flex', flexDirection:'column', textDecoration:'none', color:'inherit',

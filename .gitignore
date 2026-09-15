@@ -8,6 +8,8 @@ data/
 /tmp
 .vercel
 .env*
+# 示例文件要提交，方便别人知道该配哪些变量
+!.env.example
 tsconfig.tsbuildinfo
 out/
 node_modules/

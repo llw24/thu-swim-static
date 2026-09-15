@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useT, useLang } from '@/lib/i18n';
 import GiscusComments from './GiscusComments';
-import { withBase, WALL_CATEGORIES } from '@/lib/content-shared';
+import JoinGate from './JoinGate';
+import { WALL_CATEGORIES } from '@/lib/content-shared';
 import type {
   WallItem,
   WallCategory,
@@ -11,7 +12,7 @@ import type {
 
 /**
  * 社区页（校园墙）—— 三块结构：
- *  ① 微信群入口（二维码来自 site.json）
+ *  ① 微信群入口（JoinGate：先验证清华邮箱，验证后才看得到进群方式）
  *  ② 内容墙（content/wall/*.md 的精选外链卡片）
  *  ③ Giscus 留言板（GitHub Discussions，配置后自动启用）
  */
@@ -28,24 +29,8 @@ export default function CommunityWall({ wall, site }: { wall: WallItem[]; site: 
         {t('游泳社区 · 校园墙', 'Swim Community · Campus Wall')}
       </h1>
 
-      {/* ① 微信群入口 */}
-      <div className="card" style={{ padding:28, marginBottom:32, display:'flex', gap:24, alignItems:'center', flexWrap:'wrap' }}>
-        {site.wechatGroupQr && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={withBase(site.wechatGroupQr)}
-            alt={t('微信群二维码', 'WeChat group QR')}
-            style={{ width:150, height:150, objectFit:'contain', borderRadius:10, border:'1px solid var(--line)' }}
-          />
-        )}
-        <div style={{ flex:1, minWidth:240 }}>
-          <h2 className="serif" style={{ fontSize:22, fontWeight:500, marginBottom:8 }}>{t('加入协会微信群', 'Join our WeChat group')}</h2>
-          <p style={{ color:'#555', lineHeight:1.8, fontSize:14.5 }}>{lang === 'en' ? site.communityIntroEn : site.communityIntroZh}</p>
-          {site.contactWechat && (
-            <p style={{ color:'var(--muted)', fontSize:13, marginTop:10 }}>微信 / WeChat：{site.contactWechat}</p>
-          )}
-        </div>
-      </div>
+      {/* ① 微信群入口 —— 验证清华邮箱后才会显示进群方式 */}
+      <JoinGate site={site} />
 
       {/* ② 内容墙 */}
       <h2 className="serif" style={{ fontSize:26, fontWeight:400, marginBottom:16 }}>{t('内容墙 · 精选', 'Highlights')}</h2>

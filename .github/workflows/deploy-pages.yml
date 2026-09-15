@@ -40,6 +40,10 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ env.BASE }}
           SITE_URL: ${{ env.SITE_URL }}
+          # 验证服务（老站）地址 —— 仓库 Settings → Secrets and variables → Actions 配置。
+          # 属于公开信息（不是密钥），但需要重新构建部署才会生效。
+          # 未配置时回退到默认地址，入群验证/报名功能仍可用。
+          NEXT_PUBLIC_JOIN_API: ${{ secrets.NEXT_PUBLIC_JOIN_API }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
