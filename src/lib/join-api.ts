@@ -16,11 +16,11 @@ const RAW = process.env.NEXT_PUBLIC_JOIN_API || 'https://thu-swim.netlify.app';
 
 export const JOIN_API = RAW.replace(/\/+$/, '');
 
-export type JoinPayload = {
+/** 验证凭证的最小形状（进群/管理员通用） */
+export type VerifyPayload = { email: string; proof: string; expiresAt: number };
+
+export type JoinPayload = VerifyPayload & {
   ok: true;
-  email: string;
-  proof: string;
-  expiresAt: number;
   /** 企微群二维码 dataURL；留空表示尚未接入 */
   groupQr: string;
   /** 问卷星报名链接；留空表示报名暂未开放 */
@@ -105,8 +105,8 @@ export async function sendCode(email: string): Promise<{ ok: true; devCode?: str
 }
 
 /** 校验验证码，返回验证后可见内容 */
-export async function verifyCode(email: string, code: string): Promise<JoinPayload> {
-  const d = (await post('/api/join/verify', { email, code })) as JoinPayload;
+export async function verifyCode<T extends VerifyPayload = JoinPayload>(email: string, code: string): Promise<T> {
+  const d = (await post('/api/join/verify', { email, code })) as unknown as T;
   storeProof(d.proof, d.expiresAt);
   return d;
 }

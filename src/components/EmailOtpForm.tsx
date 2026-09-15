@@ -1,22 +1,26 @@
 'use client';
 import { useState } from 'react';
 import { useT } from '@/lib/i18n';
-import { sendCode, verifyCode, type JoinPayload } from '@/lib/join-api';
+import { sendCode, verifyCode, type VerifyPayload } from '@/lib/join-api';
+import { sendAdminCode, verifyAdminCode } from '@/lib/admin-api';
 import { ALLOWED_EMAIL_DOMAINS, isTsinghuaEmail } from '@/lib/content-shared';
 
+
+
 /**
- * 清华邮箱验证组件 —— 进群和报名共用。
+ * 清华邮箱验证组件 —— 进群（mode=join）和管理员登录（mode=admin）共用。
  *
- * 流程：输入清华邮箱 → 老站发验证码（只发 @mails.tsinghua.edu.cn / @tsinghua.edu.cn）
- * → 输入 6 位验证码 → 返回"验证后可见内容"（群二维码 / 报名入口）。
- * 验证一次拿到 30 天凭证，期间不用重复验证。
+ * join：老站校验验证码 → 返回进群二维码/报名入口。
+ * admin：老站额外校验管理员白名单 → 返回 7 天管理员凭证。
  */
-export default function EmailOtpForm({
+export default function EmailOtpForm<T extends VerifyPayload>({
   purpose,
   onVerified,
+  mode = 'join',
 }: {
   purpose?: string;
-  onVerified: (payload: JoinPayload) => void;
+  onVerified: (payload: T) => void;
+  mode?: 'join' | 'admin';
 }) {
   const t = useT();
   const [email, setEmail] = useState('');
@@ -43,7 +47,7 @@ export default function EmailOtpForm({
 
     setBusy(true);
     try {
-      const d = await sendCode(value);
+      const d = mode === 'admin' ? await sendAdminCode(value) : await sendCode(value);
       setEmail(value);
       setSent(true);
       // 只在本地未配邮件服务的开发模式出现，方便调试
@@ -65,7 +69,10 @@ export default function EmailOtpForm({
     }
     setBusy(true);
     try {
-      const payload = await verifyCode(email, token);
+      const payload =
+        mode === 'admin'
+          ? ((await verifyAdminCode<T>(email, token)))
+          : ((await verifyCode<T>(email, token)));
       onVerified(payload);
     } catch (e) {
       setError(friendlyError(e as Error & { status?: number }, t));
@@ -173,13 +180,16 @@ function friendlyError(e: Error & { status?: number }, t: (zh: string, en?: stri
   if (/验证码错误|验证码已过期|invalid|expired/i.test(m)) {
     return t('验证码不正确或已过期，请重新获取。', 'The code is wrong or expired — request a new one.');
   }
+  if (/不是.*管理员|管理员白名单/i.test(m)) {
+    return m;
+  }
   if (/清华邮箱|domain|not allowed/i.test(m)) {
     return t('该邮箱不在允许范围内，请使用清华邮箱。', 'This address is not allowed — please use a Tsinghua email.');
   }
   if (/不可用|unavailable|failed to fetch/i.test(m)) {
     return t(
-      '验证服务暂时不可用，请稍后再试，或直接联系理事会成员拉你进群。',
-      'The verification service is temporarily down — try later or ask a board member to add you.',
+      '验证服务暂时不可用，请稍后再试，或直接联系理事会成员。',
+      'The verification service is temporarily down — try later or ask a board member.',
     );
   }
   return m;

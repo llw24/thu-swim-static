@@ -85,7 +85,7 @@ export default function JoinGate({
                   )
                 : undefined
             }
-            onVerified={setPayload}
+            onVerified={(p: JoinPayload) => setPayload(p)}
           />
         </div>
       ) : isSignup ? (

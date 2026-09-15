@@ -1,18 +1,24 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import EmailOtpForm from './EmailOtpForm';
+import {
+  adminFile,
+  adminGate,
+  adminList,
+  adminRemove,
+  adminSave,
+  clearAdminProof,
+  type AdminPayload,
+} from '@/lib/admin-api';
 
 /**
- * 管理员后台 —— 纯静态实现：
- * 浏览器里直接调用 GitHub Contents API 读写本仓库 content/ 目录，
- * 提交后触发 Pages 自动重建。不需要任何服务器。
+ * 管理员后台 —— 登录改为清华邮箱验证（admins 白名单），
+ * 内容读写全部代理到老站 /api/admin/content（GitHub Token 只在服务端）。
  *
- * 使用前提：管理员本人生成一个 GitHub Token（只需本仓库的 Contents 读写权限），
- * 粘贴一次后保存在浏览器 localStorage。
+ * 老站接口见 thu-swim 仓库 src/app/api/admin/*；管理员名单用 scripts/set-admins.mjs 维护。
  */
 
 const REPO = process.env.NEXT_PUBLIC_GH_REPO || 'llw24/thu-swim-static';
-const API = `https://api.github.com/repos/${REPO}/contents`;
-const LS_KEY = 'tssa_admin_token';
 
 type Module = 'news' | 'sessions';
 type Tab = Module | 'settings';
@@ -36,7 +42,8 @@ const SCHEMA: Record<Module, {
       { key: 'date', zh: '日期', type: 'text' },
       { key: 'summary', zh: '摘要（显示在卡片上）', type: 'text' },
       { key: 'emoji', zh: '小图标', type: 'text' },
-      { key: 'pinned', zh: '置顶', type: 'check' },
+      { key: 'pinned', zh: '置顶（同步到首页卡片）', type: 'check' },
+      { key: 'url', zh: '公众号文章链接（选填，填了动态直接跳转）', type: 'text' },
       { key: 'draft', zh: '草稿（勾选 = 不公开）', type: 'check' },
     ],
   },
@@ -44,32 +51,30 @@ const SCHEMA: Record<Module, {
     label: '活动',
     folder: 'content/sessions',
     fields: [
-      { key: 'title', zh: '期次名称', type: 'text' },
+      { key: 'title', zh: '活动名称', type: 'text' },
       {
         key: 'status', zh: '状态', type: 'select',
         options: [['open', '报名中'], ['full', '名额已满'], ['closed', '已结束']],
       },
-      { key: 'description', zh: '课程简介', type: 'text' },
-      { key: 'schedule', zh: '上课时间', type: 'text' },
-      { key: 'location', zh: '上课地点', type: 'text' },
+      { key: 'description', zh: '活动简介', type: 'text' },
+      { key: 'schedule', zh: '活动时间', type: 'text' },
+      { key: 'location', zh: '活动地点', type: 'text' },
       { key: 'price', zh: '费用', type: 'text' },
-      { key: 'registerUrl', zh: '报名表单链接', type: 'text', hint: '如 https://docs.qq.com/form/page/xxx' },
-      { key: 'qr', zh: '教学群二维码图片路径', type: 'text', hint: '如 /uploads/fall01.png，留空不显示' },
+      { key: 'registerUrl', zh: '公开报名链接（选填，一般留空走验证）', type: 'text', hint: '留空 = 验证后从站内获取问卷星入口' },
+      { key: 'qr', zh: '活动群二维码图片路径', type: 'text', hint: '如 /uploads/fall01.png，留空不显示' },
       { key: 'featured', zh: '上首页展示', type: 'check' },
     ],
   },
 };
-
-// ---------------------------------------------------- 站点设置（site.json）
 
 /** content/site.json 中开放给管理员编辑的字段 */
 const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: string }[] = [
   { key: 'announcement', zh: '首页公告横幅 📢', type: 'textarea', hint: '留空则首页不显示横幅' },
   { key: 'contactEmail', zh: '联系邮箱（页脚）', type: 'text' },
   { key: 'contactWechat', zh: '微信号（页脚 + 社区页）', type: 'text' },
-  { key: 'wechatGroupQr', zh: '微信群二维码图片路径（仅作应急方案）', type: 'text', hint: '正常情况下进群方式在 Supabase 里的 join_info 表配置（见《管理员使用手册》）。这个字段只在 Supabase 未配置时才会被用到 —— 填了就等于对所有人公开二维码，失去邮箱验证的保护' },
-  { key: 'communityIntroZh', zh: '社区页介绍 · 中文', type: 'textarea' },
-  { key: 'communityIntroEn', zh: '社区页介绍 · 英文', type: 'textarea' },
+  { key: 'wechatGroupQr', zh: '微信群二维码图片路径（仅作应急方案）', type: 'text', hint: '正常情况下进群方式在老站的 join_info 配置里（见《管理员使用手册》）。这个字段只在验证服务不可用时才会被用到 —— 填了就等于对所有人公开二维码，失去邮箱验证的保护' },
+  { key: 'communityIntroZh', zh: '加入社群页介绍 · 中文', type: 'textarea' },
+  { key: 'communityIntroEn', zh: '加入社群页介绍 · 英文', type: 'textarea' },
   { key: 'gzhName', zh: '微信公众号名称（动态页导流）', type: 'text' },
   { key: 'gzhQr', zh: '公众号二维码图片路径', type: 'text', hint: '图片上传到仓库 public/uploads/ 里，如 /uploads/gzh-qr.png' },
 ];
@@ -97,8 +102,6 @@ function serializeFront(data: Fields, schemaFields: { key: string }[], body: str
   const lines = ['---'];
   for (const f of schemaFields) {
     const raw = data[f.key] ?? '';
-    const isBoolField = true; // 值类型由 parse 保留的字符串决定
-    void isBoolField;
     if (raw === '' || raw === 'false') continue;
     const isNumOrBool = /^(true|false|\d+(\.\d+)?)$/.test(raw);
     lines.push(`${f.key}: ${isNumOrBool ? raw : JSON.stringify(raw)}`);
@@ -107,120 +110,19 @@ function serializeFront(data: Fields, schemaFields: { key: string }[], body: str
   return lines.join('\n') + '\n\n' + body.replace(/^\n+/, '').replace(/\s*$/, '\n');
 }
 
-function utf8ToBase64(str: string): string {
-  return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
-}
-
 export default function AdminView() {
-  const [token, setToken] = useState('');
-  const [loginState, setLoginState] = useState<'checking' | 'ok' | 'none'>('none');
-  const [user, setUser] = useState('');
+  // ---- 登录态
+  const [proof, setProof] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [loginState, setLoginState] = useState<'checking' | 'ok' | 'none'>('checking');
   const [tab, setTab] = useState<Tab>('news');
 
-  useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY) || '';
-    setToken(saved);
-    setLoginState(saved ? 'checking' : 'none');
-    if (saved) verify(saved);
-  }, []);
-
-  async function verify(tok: string) {
-    try {
-      const r = await fetch('https://api.github.com/user', {
-        headers: { Authorization: `Bearer ${tok}`, Accept: 'application/vnd.github+json' },
-      });
-      if (!r.ok) throw new Error();
-      const d = await r.json();
-      localStorage.setItem(LS_KEY, tok);
-      setUser(d.login || '');
-      setLoginState('ok');
-      refreshAll(tok);
-    } catch {
-      setLoginState('none');
-      alert('Token 无效或权限不足，请重新粘贴。');
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem(LS_KEY);
-    setToken('');
-    setUser('');
-    setLoginState('none');
-  }
-
-  // ----------------------------------------------------------- 文件列表
-
+  // ---- 内容列表 / 站点设置 / 编辑器
   const [lists, setLists] = useState<Record<Module, FileMeta[]>>({ news: [], sessions: [] });
   const [loading, setLoading] = useState(false);
-
-  const loadList = useCallback(async (tok: string, mod: Module) => {
-    const r = await fetch(`${API}/${SCHEMA[mod].folder}?ref=main`, {
-      headers: { Authorization: `Bearer ${tok}`, Accept: 'application/vnd.github+json' },
-    });
-    if (!r.ok) throw new Error(`读取列表失败（HTTP ${r.status}）`);
-    const arr: any[] = await r.json();
-    setLists((p) => ({ ...p, [mod]: arr.filter((f) => f.name.endsWith('.md')) }));
-  }, []);
-
-  async function refreshAll(tok: string) {
-    setLoading(true);
-    try {
-      await Promise.all([loadList(tok, 'news'), loadList(tok, 'sessions'), loadSite(tok)]);
-    } catch (e: any) {
-      alert(e.message || '加载失败');
-    }
-    setLoading(false);
-  }
-
-  // --------------------------------------------------------- 站点设置状态
-
   const [siteData, setSiteData] = useState<Fields>({});
-  const [siteRawRef, setSiteRawRef] = useState<Record<string, any>>({});
+  const [siteRawRef, setSiteRawRef] = useState<Record<string, unknown>>({});
   const [siteSha, setSiteSha] = useState('');
-
-  async function loadSite(tok: string) {
-    const r = await fetch(`${API}/content/site.json?ref=main`, {
-      headers: { Authorization: `Bearer ${tok}`, Accept: 'application/vnd.github+json' },
-    });
-    if (!r.ok) throw new Error(`读取站点设置失败（HTTP ${r.status}）`);
-    const d = await r.json();
-    const parsed = JSON.parse(decodeURIComponent(escape(atob(d.content))));
-    setSiteSha(d.sha);
-    setSiteRawRef(parsed);
-    setSiteData(Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(parsed[f.key] ?? '')])));
-  }
-
-  async function saveSite() {
-    if (!token) return;
-    setBusy(true);
-    try {
-      // giscus 等技术字段原样保留，只覆盖管理员的这批字段
-      const merged = { ...siteRawRef };
-      for (const f of SITE_FIELDS) {
-        (merged as any)[f.key] = siteData[f.key] ?? '';
-      }
-      const text = JSON.stringify(merged, null, 2) + '\n';
-      const r = await fetch(`${API}/content/site.json`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-        body: JSON.stringify({
-          message: '后台设置：更新全站设置',
-          content: utf8ToBase64(text),
-          sha: siteSha,
-          branch: 'main',
-        }),
-      });
-      if (!r.ok) throw new Error(`保存失败 HTTP ${r.status}: ${JSON.stringify(await r.json()).slice(0, 200)}`);
-      alert('✅ 已保存！网站将在 2~5 分钟内自动更新。');
-      await loadSite(token);
-    } catch (e: any) {
-      alert(e.message || '保存失败');
-    }
-    setBusy(false);
-  }
-
-  // ------------------------------------------------------------- 编辑器
-
   const [editing, setEditing] = useState<null | {
     mod: Module;
     isNew: boolean;
@@ -230,6 +132,93 @@ export default function AdminView() {
     body: string;
   }>(null);
   const [busy, setBusy] = useState(false);
+
+  const loadList = useCallback(async (pf: string, mod: Module) => {
+    const files = await adminList(pf, SCHEMA[mod].folder);
+    setLists((p) => ({ ...p, [mod]: files }));
+  }, []);
+
+  async function loadSite(pf: string) {
+    const d = await adminFile(pf, 'content/site.json');
+    const parsed = JSON.parse(d.content);
+    setSiteSha(d.sha);
+    setSiteRawRef(parsed);
+    setSiteData(Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(parsed[f.key] ?? '')])));
+  }
+
+  async function refreshAll(pf: string) {
+    setLoading(true);
+    try {
+      await Promise.all([loadList(pf, 'news'), loadList(pf, 'sessions'), loadSite(pf)]);
+    } catch (e) {
+      alert((e as Error).message || '加载失败');
+    }
+    setLoading(false);
+  }
+
+  // 回访：本地 7 天凭证还在就直接进入
+  useEffect(() => {
+    let alive = true;
+    adminGate()
+      .then((p: AdminPayload | null) => {
+        if (!alive) return;
+        if (p) {
+          setProof(p.proof);
+          setAdminEmail(p.email);
+          setLoginState('ok');
+          refreshAll(p.proof);
+        } else {
+          setLoginState('none');
+        }
+      })
+      .catch(() => alive && setLoginState('none'));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅在挂载时执行一次
+  }, []);
+
+  function onVerified(p: AdminPayload) {
+    setProof(p.proof);
+    setAdminEmail(p.email);
+    setLoginState('ok');
+    refreshAll(p.proof);
+  }
+
+  function logout() {
+    clearAdminProof();
+    setProof('');
+    setAdminEmail('');
+    setLoginState('none');
+  }
+
+  // ----------------------------------------------------------- 站点设置
+
+  async function saveSite() {
+    if (!proof) return;
+    setBusy(true);
+    try {
+      // giscus 等技术字段原样保留，只覆盖管理员的这批字段（用合并而不是原地修改）
+      const overrides: Fields = {};
+      for (const f of SITE_FIELDS) {
+        overrides[f.key] = siteData[f.key] ?? '';
+      }
+      const text = JSON.stringify({ ...siteRawRef, ...overrides }, null, 2) + '\n';
+      await adminSave(proof, adminEmail, {
+        path: 'content/site.json',
+        content: text,
+        sha: siteSha,
+        message: '后台设置：更新全站设置',
+      });
+      alert('✅ 已保存！网站将在 2~5 分钟内自动更新。');
+      await loadSite(proof);
+    } catch (e) {
+      alert((e as Error).message || '保存失败');
+    }
+    setBusy(false);
+  }
+
+  // ------------------------------------------------------------- 编辑器
 
   function openNew(mod: Module) {
     const preset: Fields = {};
@@ -241,19 +230,15 @@ export default function AdminView() {
   }
 
   async function openFile(meta: FileMeta) {
-    if (!token) return;
+    if (!proof) return;
     setBusy(true);
     try {
-      const r = await fetch(`${API}/${meta.path}?ref=main`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-      });
-      if (!r.ok) throw new Error(`读取失败 HTTP ${r.status}`);
-      const d = await r.json();
-      const { data, body } = parseFront(decodeURIComponent(escape(atob(d.content))));
+      const d = await adminFile(proof, meta.path);
+      const { data, body } = parseFront(d.content);
       const mod: Module = meta.path.includes('/news/') ? 'news' : 'sessions';
       setEditing({ mod, isNew: false, fileName: meta.name, sha: d.sha, data, body });
-    } catch (e: any) {
-      alert(e.message || '打开失败');
+    } catch (e) {
+      alert((e as Error).message || '打开失败');
     }
     setBusy(false);
   }
@@ -274,23 +259,17 @@ export default function AdminView() {
 
     setBusy(true);
     try {
-      const body: any = {
+      await adminSave(proof, adminEmail, {
+        path: `${schema.folder}/${editing.fileName}`,
+        content: text,
+        sha: editing.isNew ? undefined : editing.sha,
         message: `后台编辑(${schema.label})：${titleKey}`,
-        content: utf8ToBase64(text),
-        branch: 'main',
-      };
-      if (!editing.isNew) body.sha = editing.sha;
-      const r = await fetch(`${API}/${schema.folder}/${encodeURIComponent(editing.fileName)}`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-        body: JSON.stringify(body),
       });
-      if (!r.ok) throw new Error(`保存失败 HTTP ${r.status}: ${JSON.stringify(await r.json()).slice(0, 200)}`);
       alert('✅ 已保存！网站将在 2~5 分钟内自动更新。');
       setEditing(null);
-      await loadList(token, editing.mod);
-    } catch (e: any) {
-      alert(e.message || '保存失败');
+      await loadList(proof, editing.mod);
+    } catch (e) {
+      alert((e as Error).message || '保存失败');
     }
     setBusy(false);
   }
@@ -299,16 +278,11 @@ export default function AdminView() {
     if (!confirm(`确定删除「${meta.name}」？删除后无法恢复（可在 git 历史找回）。`)) return;
     setBusy(true);
     try {
-      const r = await fetch(`${API}/${meta.path}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-        body: JSON.stringify({ message: `后台删除：${meta.name}`, sha: meta.sha, branch: 'main' }),
-      });
-      if (!r.ok) throw new Error(`删除失败 HTTP ${r.status}`);
+      await adminRemove(proof, adminEmail, { path: meta.path, sha: meta.sha });
       alert('✅ 已删除，网站将自动更新。');
-      await loadList(token, meta.path.includes('/news/') ? 'news' : 'sessions');
-    } catch (e: any) {
-      alert(e.message || '删除失败');
+      await loadList(proof, meta.path.includes('/news/') ? 'news' : 'sessions');
+    } catch (e) {
+      alert((e as Error).message || '删除失败');
     }
     setBusy(false);
   }
@@ -317,26 +291,26 @@ export default function AdminView() {
 
   const styleCard: React.CSSProperties = { padding: 28, maxWidth: 860, margin: '0 auto 20px' };
 
+  if (loginState === 'checking') {
+    return (
+      <main className="container" style={{ padding: '110px 24px 60px', maxWidth: 720 }}>
+        <h1 className="serif" style={{ fontSize: 32, marginBottom: 16 }}>🔧 管理员登录</h1>
+        <div className="card" style={styleCard}>
+          <p style={{ color: 'var(--muted)', fontSize: 14 }}>{'正在检查登录状态…'}</p>
+        </div>
+      </main>
+    );
+  }
+
   if (loginState !== 'ok') {
     return (
-      <main className="container" style={{ padding:'110px 24px 60px', maxWidth:720 }}>
-        <h1 className="serif" style={{ fontSize:32, marginBottom:16 }}>🔧 管理员登录</h1>
-        <div className="card" style={styleCard}>
-          <p style={{ color:'#555', lineHeight:1.8, fontSize:14 }}>
-            粘贴一个 GitHub Personal Access Token（需含本仓库 <b>Contents: Read and write</b> 权限）。<br />
-            获取方式：GitHub 右上角头像 → <b>Settings → Developer settings → Fine-grained tokens → Generate new token</b>，
-            Repository access 选 <b>Only select repositories → {REPO}</b>，Permissions 里给 <b>Contents</b> 选 <b>Read and write</b>。<br />
-            Token 只保存在你自己的浏览器里，不会上传到别处。
-          </p>
-          <input
-            className="input" type="password" placeholder="ghp_ 或 github_pat_ 开头"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
-          <div style={{ display:'flex', gap:12, marginTop:14 }}>
-            <button className="btn-primary" onClick={() => token && verify(token)}>{loginState === 'checking' ? '校验中…' : '登录'}</button>
-          </div>
-        </div>
+      <main className="container" style={{ padding: '110px 24px 60px', maxWidth: 720 }}>
+        <h1 className="serif" style={{ fontSize: 32, marginBottom: 16 }}>🔧 管理员登录</h1>
+        <EmailOtpForm
+          mode="admin"
+          purpose="管理员用清华邮箱验证登录，无需 GitHub Token。只有白名单里的邮箱可以进入；需要开通请联系技术负责人。"
+          onVerified={onVerified}
+        />
       </main>
     );
   }
@@ -346,7 +320,7 @@ export default function AdminView() {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
         <h1 className="serif" style={{ fontSize:32 }}>🔧 内容管理</h1>
         <span style={{ fontSize:13, color:'var(--muted)' }}>
-          已登录 GitHub：{user} · <a href="#" onClick={(e)=>{e.preventDefault();logout();}} style={{color:'#A61E1E'}}>退出</a> ·{' '}
+          已登录：{adminEmail} · <a href="#" onClick={(e)=>{e.preventDefault();logout();}} style={{color:'#A61E1E'}}>退出</a> ·{' '}
           <a href={`https://github.com/${REPO}/actions`} target="_blank" rel="noopener noreferrer">部署进度 ↗</a>
         </span>
       </div>
@@ -375,7 +349,7 @@ export default function AdminView() {
         <div className="card" style={styleCard}>
           <h2 style={{ fontSize:20, fontWeight:600, marginBottom:16 }}>⚙️ 全站设置</h2>
           <p style={{ color:'#666', fontSize:13, lineHeight:1.7, marginBottom:8 }}>
-            这里的内容全站生效（首页公告、页脚联系方式、社区页介绍等）。
+            这里的内容全站生效（首页公告、页脚联系方式、加入社群页介绍等）。
           </p>
           {SITE_FIELDS.map((f) => (
             <label key={f.key} className="label" style={{ display:'block', marginTop:12 }}>
