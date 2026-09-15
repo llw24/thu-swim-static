@@ -3,9 +3,12 @@ import { useState } from 'react';
 import { useT } from '@/lib/i18n';
 import { sendCode, verifyCode, type VerifyPayload } from '@/lib/join-api';
 import { sendAdminCode, verifyAdminCode } from '@/lib/admin-api';
-import { ALLOWED_EMAIL_DOMAINS, isTsinghuaEmail } from '@/lib/content-shared';
+import { isTsinghuaEmail } from '@/lib/content-shared';
 
+type PayloadShape = { email: string; proof: string; expiresAt: number };
 
+/** 下拉里可选的清华邮箱后缀（严格两种；服务端白名单里的旧域名仅作兼容保留） */
+const SUFFIXES = ['@mails.tsinghua.edu.cn', '@tsinghua.edu.cn'];
 
 /**
  * 清华邮箱验证组件 —— 进群（mode=join）和管理员登录（mode=admin）共用。
@@ -13,7 +16,7 @@ import { ALLOWED_EMAIL_DOMAINS, isTsinghuaEmail } from '@/lib/content-shared';
  * join：老站校验验证码 → 返回进群二维码/报名入口。
  * admin：老站额外校验管理员白名单 → 返回 7 天管理员凭证。
  */
-export default function EmailOtpForm<T extends VerifyPayload>({
+export default function EmailOtpForm<T extends PayloadShape>({
   purpose,
   onVerified,
   mode = 'join',
@@ -23,32 +26,41 @@ export default function EmailOtpForm<T extends VerifyPayload>({
   mode?: 'join' | 'admin';
 }) {
   const t = useT();
-  const [email, setEmail] = useState('');
+  const [emailUser, setEmailUser] = useState('');
+  const [suffix, setSuffix] = useState(SUFFIXES[0]);
+  const [sentEmail, setSentEmail] = useState('');
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [devHint, setDevHint] = useState('');
 
-  const domainHint = ALLOWED_EMAIL_DOMAINS.filter((d) => d !== 'mail.tsinghua.edu.cn')
-    .map((d) => `@${d}`)
-    .join(' / ');
+  const composedEmail = `${emailUser.trim().toLowerCase()}${suffix}`;
 
   async function onSend(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setDevHint('');
 
-    const value = email.trim().toLowerCase();
-    if (!isTsinghuaEmail(value)) {
-      setError(t(`请使用清华邮箱（${domainHint}）`, `Please use a Tsinghua email (${domainHint})`));
+    const user = emailUser.trim().toLowerCase();
+    if (!/^[A-Za-z0-9._-]{1,32}$/.test(user)) {
+      setError(
+        t(
+          '邮箱用户名格式不对：只允许字母、数字、点（.）、下划线和连字符',
+          'Invalid username: letters, digits, dots, underscores and hyphens only',
+        ),
+      );
+      return;
+    }
+    if (!isTsinghuaEmail(composedEmail)) {
+      setError(t('请选择清华邮箱后缀', 'Please pick a Tsinghua email suffix'));
       return;
     }
 
     setBusy(true);
     try {
-      const d = mode === 'admin' ? await sendAdminCode(value) : await sendCode(value);
-      setEmail(value);
+      const d = mode === 'admin' ? await sendAdminCode(composedEmail) : await sendCode(composedEmail);
+      setSentEmail(composedEmail);
       setSent(true);
       // 只在本地未配邮件服务的开发模式出现，方便调试
       if (d.devCode) setDevHint(t(`（开发模式）验证码：${d.devCode}`, `(dev) code: ${d.devCode}`));
@@ -71,8 +83,8 @@ export default function EmailOtpForm<T extends VerifyPayload>({
     try {
       const payload =
         mode === 'admin'
-          ? ((await verifyAdminCode<T>(email, token)))
-          : ((await verifyCode<T>(email, token)));
+          ? ((await verifyAdminCode<T>(sentEmail, token)) as T)
+          : ((await verifyCode<T>(sentEmail, token)) as T);
       onVerified(payload);
     } catch (e) {
       setError(friendlyError(e as Error & { status?: number }, t));
@@ -99,30 +111,46 @@ export default function EmailOtpForm<T extends VerifyPayload>({
           <label style={{ fontSize: 13, color: 'var(--muted)' }}>
             {t('清华邮箱', 'Tsinghua email')}
           </label>
-          <input
-            className="input"
-            type="email"
-            required
-            autoComplete="email"
-            placeholder={`xxx@${ALLOWED_EMAIL_DOMAINS[0]}`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '100%' }}
-          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              className="input"
+              type="text"
+              required
+              autoCapitalize="none"
+              autoCorrect="off"
+              placeholder={t('学号或用户名', 'student ID or username')}
+              value={emailUser}
+              onChange={(e) => setEmailUser(e.target.value)}
+              style={{ flex: 1, minWidth: 0 }}
+            />
+            <select
+              className="input"
+              value={suffix}
+              onChange={(e) => setSuffix(e.target.value)}
+              style={{ width: 'auto', flexShrink: 0, whiteSpace: 'nowrap' }}
+              aria-label={t('邮箱后缀', 'Email domain')}
+            >
+              {SUFFIXES.map((sfx) => (
+                <option key={sfx} value={sfx}>
+                  {sfx}
+                </option>
+              ))}
+            </select>
+          </div>
           <button className="btn-primary" type="submit" disabled={busy} style={{ alignSelf: 'flex-start' }}>
             {busy ? t('发送中…', 'Sending…') : t('发送验证码 →', 'Send code →')}
           </button>
           <p style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.7 }}>
             {t(
-              `仅接受 ${domainHint} 的邮箱，其他邮箱无法收到验证码。`,
-              `Only ${domainHint} addresses are accepted.`,
+              '只支持清华邮箱：输入用户名，后缀从右侧选择；验证码发到对应邮箱。',
+              'Tsinghua addresses only — enter your username and pick the suffix on the right.',
             )}
           </p>
         </form>
       ) : (
         <form onSubmit={onVerify} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontSize: 14, color: '#333', lineHeight: 1.8 }}>
-            {t('验证码已发往', 'Code sent to')} <b>{email}</b>
+            {t('验证码已发往', 'Code sent to')} <b>{sentEmail}</b>
           </div>
           <label style={{ fontSize: 13, color: 'var(--muted)' }}>
             {t('6 位验证码', '6-digit code')}
@@ -185,6 +213,9 @@ function friendlyError(e: Error & { status?: number }, t: (zh: string, en?: stri
   }
   if (/清华邮箱|domain|not allowed/i.test(m)) {
     return t('该邮箱不在允许范围内，请使用清华邮箱。', 'This address is not allowed — please use a Tsinghua email.');
+  }
+  if (/无法访问验证服务|被拦截|插件/i.test(m)) {
+    return m;
   }
   if (/不可用|unavailable|failed to fetch/i.test(m)) {
     return t(

@@ -7,7 +7,7 @@
  */
 'use client';
 
-import { JOIN_API, type VerifyPayload } from './join-api';
+import { JOIN_API, networkDiagnosis, type VerifyPayload } from './join-api';
 
 const LS_KEY = 'tssa_admin_proof';
 
@@ -58,15 +58,12 @@ async function post(path: string, body: unknown, attempt = 0): Promise<unknown> 
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(20_000),
     });
-  } catch {
+  } catch (e) {
     if (attempt === 0) {
       await new Promise((r) => setTimeout(r, 800));
       return post(path, body, 1);
     }
-    throw new Error(
-      '无法连接验证服务（网络原因或被浏览器插件拦截）。' +
-        '可以换个网络再试，或在浏览器打开 thu-swim.netlify.app/api/health 自测服务是否可达。',
-    );
+    throw new Error(await networkDiagnosis(e));
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

@@ -67,6 +67,38 @@ export function clearProof() {
   }
 }
 
+/** 网络层失败时的自动诊断：服务到底能不能被当前网络访问到 */
+export async function probeService(): Promise<'reachable' | 'blocked'> {
+  try {
+    // no-cors 模式：只要网络层能连通就算可达（不读内容，因此不需要 CORS）
+    await fetch(`${JOIN_API}/api/health`, {
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(8000),
+    });
+    return 'reachable';
+  } catch {
+    return 'blocked';
+  }
+}
+
+/** 把网络层失败翻译成带诊断结论的报错 */
+export async function networkDiagnosis(e: unknown): Promise<string> {
+  const name = (e as { name?: string })?.name || '';
+  const timedOut = name === 'TimeoutError' || name === 'AbortError';
+  const reach = await probeService();
+  if (reach === 'reachable') {
+    return (
+      `浏览器发起了请求但未完成（${timedOut ? '超时' : '被拦截'}），而验证服务本身可达 —— ` +
+      '多半是广告拦截类插件或本地缓存在作怪：请关闭广告拦截插件、强制刷新（Ctrl+Shift+R）后重试。'
+    );
+  }
+  return (
+    `当前网络无法访问验证服务（${JOIN_API}）。请更换网络（如手机流量）后重试；` +
+    '若换网络后仍失败，请联系技术负责人（可能需要给验证服务绑定独立域名）。'
+  );
+}
+
 async function post(path: string, body: unknown, attempt = 0): Promise<unknown> {
   let res: Response;
   try {
@@ -77,18 +109,13 @@ async function post(path: string, body: unknown, attempt = 0): Promise<unknown> 
       // 15 秒超时：不让用户对着转圈的页面干等
       signal: AbortSignal.timeout(15_000),
     });
-  } catch {
-    // 网络层失败（连不上/被拦截/超时）：自动重试一次，仍失败给出可自查的提示
+  } catch (e) {
+    // 网络层失败（连不上/被拦截/超时）：自动重试一次，仍失败给出诊断结论
     if (attempt === 0) {
       await new Promise((r) => setTimeout(r, 800));
       return post(path, body, 1);
     }
-    throw new Error(
-      '无法连接验证服务（网络原因或被浏览器插件拦截）。' +
-        '可以：① 换个网络再试（比如手机流量）；② 关闭广告拦截类插件；' +
-        '③ 在浏览器直接打开 thu-swim.netlify.app/api/health 自测服务是否可达——' +
-        '能打开说明服务正常，是你当前网络到它的链路问题；打不开就是当前网络屏蔽了该域名。',
-    );
+    throw new Error(await networkDiagnosis(e));
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
