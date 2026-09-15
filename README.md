@@ -17,8 +17,7 @@ content/               ← 网站全部内容（谁都能改）
 ├── site.json          全局设置：公告 / 联系方式 / 公众号 / 应急二维码
 ├── news/*.md          动态（现在主要是公众号文章链接，url 指向 mp.weixin.qq.com）
 ├── sessions/*.md      零基础班期次（时间地点费用；报名入口走验证）
-├── coaches/*.md       教练资料卡
-└── wall/*.md          社区墙精选外链
+├── wall/*.md          社区墙精选外链
 src/
 ├── lib/content.ts     ★ 统一内容读取器：新增模块 = content/ 加文件夹 + 这里加一个函数
 ├── lib/join-api.ts    ★ 验证服务客户端：发码 / 验证 / 凭证回访

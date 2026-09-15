@@ -1,19 +1,19 @@
 name: 📝 发布内容
-description: 填表发布新闻 / 课程 / 教练 / 社区墙内容，机器人自动更新网站
+description: 填表发布新闻 / 课程 / 社区墙内容，机器人自动更新网站
 labels: ["发布"]
 body:
   - type: dropdown
     id: type
     attributes:
       label: 内容类型
-      options: [新闻, 课程, 教练, 社区墙]
+      options: [新闻, 课程, 社区墙]
     validations: { required: true }
 
   - type: input
     id: title
     attributes:
       label: 标题
-      description: 新闻/课程的标题，或教练的姓名
+      description: 新闻或课程的标题
       placeholder: 如：2026 马约翰杯游泳赛报名开始
     validations: { required: true }
 
@@ -52,7 +52,7 @@ body:
     id: body
     attributes:
       label: 正文
-      description: 支持 Markdown。新闻=正文；课程=详细说明；教练=个人介绍；社区墙可留空
+      description: 支持 Markdown。新闻=正文；课程=详细说明；社区墙可留空
     validations: { required: true }
 
   - type: input
@@ -88,27 +88,6 @@ body:
     attributes:
       label: 课程状态（仅课程）
       options: [报名中, 名额已满, 已结束]
-    validations: { required: false }
-
-  - type: input
-    id: specialties
-    attributes:
-      label: 擅长泳姿（仅教练）
-      placeholder: 蛙泳 / 自由泳 / 转身技术
-    validations: { required: false }
-
-  - type: input
-    id: availability
-    attributes:
-      label: 可授课时间（仅教练）
-      placeholder: 周末全天
-    validations: { required: false }
-
-  - type: input
-    id: coachContact
-    attributes:
-      label: 联系方式（仅教练）
-      placeholder: 通过协会联系 / 微信号 xxx
     validations: { required: false }
 
   - type: input

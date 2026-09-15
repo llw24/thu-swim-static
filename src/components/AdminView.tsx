@@ -72,8 +72,6 @@ const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: 
   { key: 'communityIntroEn', zh: '社区页介绍 · 英文', type: 'textarea' },
   { key: 'gzhName', zh: '微信公众号名称（动态页导流）', type: 'text' },
   { key: 'gzhQr', zh: '公众号二维码图片路径', type: 'text', hint: '图片上传到仓库 public/uploads/ 里，如 /uploads/gzh-qr.png' },
-  { key: 'coachRequestUrl', zh: '“我要找教练”表单链接', type: 'text', hint: '留空则显示加微信引导' },
-  { key: 'coachApplyUrl', zh: '教练入驻申请表单链接', type: 'text', hint: '留空则显示加微信引导' },
 ];
 
 // ---------------------------------------------------------- 前置元数据解析

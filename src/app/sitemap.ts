@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ).replace(/\/$/, '');
 
   const now = new Date();
-  const items: MetadataRoute.Sitemap = ['', 'training', 'community', 'coaches', 'news', 'about'].map(
+  const items: MetadataRoute.Sitemap = ['', 'training', 'community', 'news', 'about'].map(
     (p) => ({
       url: `${base}/${p}`,
       lastModified: now,

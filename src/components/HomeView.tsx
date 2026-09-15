@@ -139,7 +139,7 @@ export default function HomeView({
 
       <div className="container">
         <h2 className="serif" style={{ fontSize:32, textAlign:'center', marginBottom:12, fontWeight:400 }}>{t('协会为你提供', 'What we offer')}</h2>
-        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('教学 · 社区 · 教练资源，一个入口全部搞定', 'Lessons · Community · Coaches — all in one place')}</p>
+        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('教学 · 社区 · 校园赛事，一个入口全部搞定', 'Lessons · Community · Campus meets — all in one place')}</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px,1fr))', gap:24, marginBottom:80 }}>
           <ModuleCard
             emoji="🏊‍♀️"
@@ -155,13 +155,6 @@ export default function HomeView({
             desc={t('加入协会微信群交流讨论，社区墙汇集精选求助、分享与约游内容。', 'Join our WeChat group for discussions — the community wall collects selected Q&A, sharing and meetups.')}
             href="/community"
             cta={t('进入社区', 'Enter community') + ' →'}
-          />
-          <ModuleCard
-            emoji="👨‍🏫"
-            title={t('找教练', 'Find a Coach')}
-            desc={t('需要一对一指导？浏览协会认证教练资料，或提交需求由协会为你对接。', 'Need 1-on-1 coaching? Browse certified coach profiles, or submit a request and we will match you.')}
-            href="/coaches"
-            cta={t('浏览教练', 'Browse coaches') + ' →'}
           />
         </div>
       </div>

@@ -68,17 +68,6 @@ export type SessionItem = {
   featured: boolean;
 };
 
-// ---------------------------------------------------------------- 教练
-
-export type CoachItem = {
-  slug: string;
-  name: string;
-  specialties: string;
-  bio: string;
-  availability: string;
-  contact: string;
-};
-
 // -------------------------------------------------------------- 社区墙
 
 export type WallCategory = 'share' | 'question' | 'buddy';
@@ -119,8 +108,5 @@ export type SiteSettings = {
   /** 微信公众号（动态都发在这里，官网动态页做导流） */
   gzhName: string;
   gzhQr: string;
-  /** 找教练表单链接（学员需求 / 教练入驻），留空则显示微信引导 */
-  coachRequestUrl: string;
-  coachApplyUrl: string;
   giscus: GiscusConfig;
 };

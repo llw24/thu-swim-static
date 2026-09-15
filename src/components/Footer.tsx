@@ -24,7 +24,6 @@ export default function Footer({ site }: { site: SiteSettings }) {
             <ul style={{ listStyle:'none', color:'#cbd5e1', fontSize:14, display:'flex', flexDirection:'column', gap:10 }}>
               <li><Link href="/training" style={{ color:'inherit' }}>{t('零基础班', 'Beginner Class')}</Link></li>
               <li><Link href="/community" style={{ color:'inherit' }}>{t('社区', 'Community')}</Link></li>
-              <li><Link href="/coaches" style={{ color:'inherit' }}>{t('找教练', 'Coaches')}</Link></li>
               <li><Link href="/news" style={{ color:'inherit' }}>{t('动态', 'News')}</Link></li>
               <li><Link href="/about" style={{ color:'inherit' }}>{t('关于协会', 'About')}</Link></li>
             </ul>

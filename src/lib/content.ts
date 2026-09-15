@@ -12,8 +12,7 @@ import { renderMarkdown } from './markdown';
  * 每个功能模块对应 content/ 下一个文件夹：
  *   content/news/*.md      新闻
  *   content/sessions/*.md  零基础班期次
- *   content/coaches/*.md   教练卡片
- *   content/wall/*.md      社区墙外链
+ *   content/wall/*.md      社区墙精选外链
  *   content/site.json      全站设置
  *
  * 要新增一个模块：content/ 下新建文件夹 + 在这里加一个 getXxx() 即可。
@@ -25,7 +24,6 @@ import type {
   NewsItem,
   SessionItem,
   SessionStatus,
-  CoachItem,
   WallItem,
   WallCategory,
   SiteSettings,
@@ -109,19 +107,6 @@ export function getFeaturedSession(): SessionItem | null {
     ?? null;
 }
 
-// ---------------------------------------------------------------- 教练
-
-export function getCoaches(): CoachItem[] {
-  return readDir('coaches').map((d) => ({
-    slug: d.slug,
-    name: String(d.front.name ?? d.slug),
-    specialties: String(d.front.specialties ?? ''),
-    bio: String(d.front.bio ?? d.body),
-    availability: String(d.front.availability ?? ''),
-    contact: String(d.front.contact ?? ''),
-  }));
-}
-
 // -------------------------------------------------------------- 社区墙
 
 export function getWall(): WallItem[] {
@@ -153,8 +138,6 @@ export function getSite(): SiteSettings {
     communityIntroEn: '',
     gzhName: '',
     gzhQr: '',
-    coachRequestUrl: '',
-    coachApplyUrl: '',
     giscus: { repo: '', repoId: '', category: '', categoryId: '' },
   };
   try {

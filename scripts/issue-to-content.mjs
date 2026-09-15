@@ -38,13 +38,13 @@ function slugify(title, prefixDate) {
   return prefixDate ? `${prefixDate}-${s}` : s;
 }
 
-const TYPE_DIRS = { '新闻': 'news', '课程': 'sessions', '教练': 'coaches', '社区墙': 'wall' };
+const TYPE_DIRS = { '新闻': 'news', '课程': 'sessions', '社区墙': 'wall' };
 
 const f = parseForm(process.env.ISSUE_BODY || '');
 const type = (f['内容类型'] || '').trim();
 const dir = TYPE_DIRS[type];
 if (!dir) {
-  console.error(`未知内容类型：「${type}」，必须是 新闻/课程/教练/社区墙 之一`);
+  console.error(`未知内容类型：「${type}」，必须是 新闻/课程/社区墙 之一`);
   process.exit(1);
 }
 
@@ -80,13 +80,6 @@ switch (dir) {
     add('registerUrl', f['报名表单链接'] || '');
     add('featured', 'false');
     frontBody = body || '报名方式见课程卡片上的报名按钮。';
-    break;
-  case 'coaches':
-    add('name', JSON.stringify(title));
-    add('specialties', JSON.stringify(f['擅长泳姿'] || ''));
-    add('availability', JSON.stringify(f['可授课时间'] || ''));
-    add('contact', JSON.stringify(f['联系方式'] || '通过协会联系'));
-    frontBody = body;
     break;
   case 'wall':
     add('title', JSON.stringify(title));

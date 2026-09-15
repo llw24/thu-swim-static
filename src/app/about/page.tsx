@@ -30,7 +30,6 @@ export default function About() {
         <ul style={{ color:'#333', lineHeight: 1.9, paddingLeft: 22 }}>
           <li><strong>{t('零基础班', 'Beginner Class')}</strong>：{t('每学期开设蛙泳、自由泳等多个班次，八次课带你从怕水到独立游 25 米。', 'Breaststroke and freestyle sections each term. Eight sessions take you from fearing the water to swimming 25m on your own.')}</li>
           <li><strong>{t('校内游泳社区', 'Campus Swim Community')}</strong>：{t('技术求助、分享、约游三大版块，认证队员和教练为你解答。', 'Three boards — technique Q&A, sharing, meetups — with answers from certified members and coaches.')}</li>
-          <li><strong>{t('教练资源对接', 'Coach Matching')}</strong>：{t('对接协会认证的指导员与教练员，为有一对一需求的同学匹配合适人选。', 'We connect students seeking 1-on-1 coaching with association-certified instructors.')}</li>
           <li><strong>{t('马约翰杯游泳赛', 'Ma Yuehan Cup')}</strong>：{t('每年秋季学期承办校级游泳赛事。', 'We host the university swim meet every fall term.')}</li>
           <li><strong>{t('校队与代表队服务', 'Support for university teams')}</strong>：{t('为清华游泳队与游泳代表队提供后勤与训练支持。', 'Logistics and training support for the Tsinghua swim team and varsity squad.')}</li>
         </ul>
