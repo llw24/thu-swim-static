@@ -22,8 +22,8 @@ export default function Navbar() {
   const linkClass = (p: string) => `nav-link${pathname === p ? ' active' : ''}`;
   const links: [string, { zh: string; en: string }][] = [
     ['/', { zh: '首页', en: 'Home' }],
-    ['/training', { zh: '零基础班', en: 'Beginner Class' }],
-    ['/community', { zh: '社区', en: 'Community' }],
+    ['/training', { zh: '活动报名', en: 'Sign-up' }],
+    ['/community', { zh: '加入社群', en: 'Join Us' }],
     ['/news', { zh: '动态', en: 'News' }],
     ['/about', { zh: '关于', en: 'About' }],
   ];

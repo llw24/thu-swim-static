@@ -11,9 +11,9 @@ import type {
 } from '@/lib/content-shared';
 
 /**
- * 社区页（校园墙）—— 三块结构：
- *  ① 微信群入口（JoinGate：先验证清华邮箱，验证后才看得到进群方式）
- *  ② 内容墙（content/wall/*.md 的精选外链卡片）
+ * 加入社群页 —— 三块结构：
+ *  ① 验证入群（JoinGate：先验证清华邮箱，验证后才看得到进群方式与报名入口）
+ *  ② 社群精选（content/wall/*.md 的公众号文章/视频外链）
  *  ③ Giscus 留言板（GitHub Discussions，配置后自动启用）
  */
 export default function CommunityWall({ wall, site }: { wall: WallItem[]; site: SiteSettings }) {
@@ -24,16 +24,16 @@ export default function CommunityWall({ wall, site }: { wall: WallItem[]; site: 
 
   return (
     <main className="container" style={{ padding:'110px 24px 60px', maxWidth:900 }}>
-      <p className="eyebrow" style={{ marginBottom:10 }}>Community</p>
+      <p className="eyebrow" style={{ marginBottom:10 }}>Join Us</p>
       <h1 className="serif" style={{ fontSize:36, fontWeight:400, marginBottom:28 }}>
-        {t('游泳社区 · 校园墙', 'Swim Community · Campus Wall')}
+        {t('加入社群', 'Join Our Community')}
       </h1>
 
-      {/* ① 微信群入口 —— 验证清华邮箱后才会显示进群方式 */}
+      {/* ① 验证入群 —— 验证清华邮箱后才会显示进群方式与报名入口 */}
       <JoinGate site={site} />
 
-      {/* ② 内容墙 */}
-      <h2 className="serif" style={{ fontSize:26, fontWeight:400, marginBottom:16 }}>{t('内容墙 · 精选', 'Highlights')}</h2>
+      {/* ② 社群精选 */}
+      <h2 className="serif" style={{ fontSize:26, fontWeight:400, marginBottom:16 }}>{t('社群精选', 'Highlights')}</h2>
       <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap' }}>
         <Chip active={cat==='all'} onClick={()=>setCat('all')}>{t('全部', 'All')}</Chip>
         {(Object.keys(WALL_CATEGORIES) as WallCategory[]).map((k) => (

@@ -4,7 +4,7 @@ import { withBase } from '@/lib/content-shared';
 import type { SessionItem, SessionStatus } from '@/lib/content-shared';
 
 /**
- * 零基础班 —— 期次信息来自 content/sessions/*.md（构建时注入）。
+ * 活动报名页 —— 活动信息来自 content/sessions/*.md（构建时注入）。
  * 报名走问卷星：链接不公开在页面上，点「立即报名」先做清华邮箱验证，
  * 验证后由老站接口发放报名入口（见 /join）。
  */
@@ -15,32 +15,35 @@ export default function TrainingView({ sessions }: { sessions: SessionItem[] }) 
 
   return (
     <main className="container" style={{ padding:'110px 24px 60px' }}>
-      <p className="eyebrow" style={{ marginBottom:10 }}>Beginner Class</p>
-      <h1 className="serif" style={{ fontSize:36, fontWeight:400, marginBottom:12 }}>{t('零基础班', 'Beginner Class')}</h1>
+      <p className="eyebrow" style={{ marginBottom:10 }}>Sign-up</p>
+      <h1 className="serif" style={{ fontSize:36, fontWeight:400, marginBottom:12 }}>{t('活动报名', 'Activity Sign-up')}</h1>
       <p style={{ color:'#444', maxWidth:720, lineHeight:1.7, marginBottom:12 }}>
         {t(
-          '面向从未接触过游泳、或希望进阶的清华同学。协会每学期开设多个班次（如蛙泳班、自由泳班），由校队队员与专业教练小班执教，学期末进行独立游泳测试。',
-          'For Tsinghua students who have never swum before, or want to improve. Each term we run several sections (breaststroke, freestyle, etc.) taught in small classes by team members and coaches, with a final swim test at term end.'
+          '协会的各类活动都在这里开放报名：零基础教学班、进阶训练、校内赛事、体验活动等。报名需先用清华邮箱验证身份（一次验证，进群和报名通用）。',
+          'All club activities open for sign-up here: beginner classes, advanced training, campus meets and taster sessions. A quick Tsinghua email verification is required first (it also covers joining the WeChat group).',
         )}
       </p>
       <p style={{ color:'var(--muted)', maxWidth:720, lineHeight:1.7, fontSize:13.5, marginBottom:40 }}>
         {t(
-          '报名需先用清华邮箱验证身份（一次验证，进群和报名通用）；名额有限，先到先得，满员后请联系理事会进入候补。',
-          'Sign-up requires a quick Tsinghua email verification (also covers joining the WeChat group). Seats are limited — first come, first served.',
+          '名额有限，先到先得；每期名额与截止时间以活动卡片为准，满员后请联系理事会登记候补。',
+          'Seats are limited and first come, first served. Check each card for capacity and deadlines; contact a board member for the waitlist once full.',
         )}
       </p>
 
       {active.length > 0 ? (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(360px,1fr))', gap:20, marginBottom:40 }}>
-          {active.map((s) => <SessionCard key={s.slug} session={s} t={t} />)}
+        <div style={{ marginBottom:40 }}>
+          <h3 className="serif" style={{ fontSize:22, fontWeight:500, marginBottom:16 }}>{t('正在报名', 'Open now')}</h3>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(360px,1fr))', gap:20 }}>
+            {active.map((s) => <SessionCard key={s.slug} session={s} t={t} />)}
+          </div>
         </div>
       ) : (
-        <div className="card" style={{ padding:40, marginBottom:40 }}>{t('本期暂无课程，请留意后续公告。', 'No classes this term — watch for future announcements.')}</div>
+        <div className="card" style={{ padding:40, marginBottom:40 }}>{t('近期没有开放报名的活动，请留意首页公告，或先加入社群等通知。', 'Nothing open for sign-up right now — watch the homepage or join the group to get notified.')}</div>
       )}
 
       {past.length > 0 && (
         <div style={{ marginTop:20 }}>
-          <h3 className="serif" style={{ fontSize:20, marginBottom:16 }}>{t('往期回顾', 'Past terms')}</h3>
+          <h3 className="serif" style={{ fontSize:20, marginBottom:16 }}>{t('往期活动', 'Past activities')}</h3>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))', gap:12 }}>
             {past.map((p) => (
               <div key={p.slug} className="card" style={{ padding:20 }}>

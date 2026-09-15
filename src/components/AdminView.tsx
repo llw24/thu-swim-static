@@ -41,7 +41,7 @@ const SCHEMA: Record<Module, {
     ],
   },
   sessions: {
-    label: '课程',
+    label: '活动',
     folder: 'content/sessions',
     fields: [
       { key: 'title', zh: '期次名称', type: 'text' },

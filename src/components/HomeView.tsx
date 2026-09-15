@@ -139,14 +139,14 @@ export default function HomeView({
 
       <div className="container">
         <h2 className="serif" style={{ fontSize:32, textAlign:'center', marginBottom:12, fontWeight:400 }}>{t('协会为你提供', 'What we offer')}</h2>
-        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('教学 · 社区 · 校园赛事，一个入口全部搞定', 'Lessons · Community · Campus meets — all in one place')}</p>
+        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('活动报名 · 加入社群 · 校园赛事，一个入口全部搞定', 'Sign-ups · Community · Campus meets — all in one place')}</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px,1fr))', gap:24, marginBottom:80 }}>
           <ModuleCard
             emoji="🏊‍♀️"
-            title={t('零基础班', 'Beginner Class')}
-            desc={t('每年春秋两季开班，四周八次课，专业教练小班教学。学期末承诺能独立游完 25 米。', 'Spring and fall terms · 8 sessions over 4 weeks · small-class instruction. By term end, you will swim 25m on your own.')}
+            title={t('活动报名', 'Sign-up')}
+            desc={t('零基础教学班、进阶训练、校园赛事等活动的报名入口都在这里，验证清华邮箱后即可报名。', 'Beginner classes, training, campus meets — all sign-ups live here, unlocked with a quick Tsinghua email verification.')}
             href="/training"
-            cta={(session?.status === 'open' ? t('前往报名', 'Register now') : t('查看本期课程', 'View current term')) + ' →'}
+            cta={(session?.status === 'open' ? t('前往报名', 'Register now') : t('查看本期活动', 'View current activities')) + ' →'}
             statusChip={trainingStatus}
           />
           <ModuleCard

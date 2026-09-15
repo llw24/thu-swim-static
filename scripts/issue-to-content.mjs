@@ -38,7 +38,7 @@ function slugify(title, prefixDate) {
   return prefixDate ? `${prefixDate}-${s}` : s;
 }
 
-const TYPE_DIRS = { '新闻': 'news', '课程': 'sessions', '社区墙': 'wall' };
+const TYPE_DIRS = { '新闻': 'news', '活动': 'sessions', '社区墙': 'wall' };
 
 const f = parseForm(process.env.ISSUE_BODY || '');
 const type = (f['内容类型'] || '').trim();

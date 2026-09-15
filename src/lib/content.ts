@@ -11,7 +11,7 @@ import { renderMarkdown } from './markdown';
  *
  * 每个功能模块对应 content/ 下一个文件夹：
  *   content/news/*.md      新闻
- *   content/sessions/*.md  零基础班期次
+ *   content/sessions/*.md  活动期次（开放报名的活动）
  *   content/wall/*.md      社区墙精选外链
  *   content/site.json      全站设置
  *
