@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useT } from '@/lib/i18n';
 import { withBase } from '@/lib/content-shared';
-import type { NewsItem, SessionItem } from '@/lib/content-shared';
+import type { NewsItem } from '@/lib/content-shared';
 
 /**
  * 首页 —— 视觉与原动态站一致（英雄图轮播 + 新闻轮播 + 公告横幅 + 模块卡片），
@@ -11,17 +11,18 @@ import type { NewsItem, SessionItem } from '@/lib/content-shared';
  */
 export default function HomeView({
   news,
-  session,
   announcement,
 }: {
-  news: Pick<NewsItem, 'slug' | 'title' | 'date' | 'summary' | 'emoji' | 'url'>[];
-  session: SessionItem | null;
+  news: Pick<NewsItem, 'slug' | 'title' | 'date' | 'summary' | 'emoji' | 'url' | 'pinned'>[];
   announcement: string;
 }) {
   const [idx, setIdx] = useState(0);
   const [heroIdx, setHeroIdx] = useState(0);
   const HERO_IMAGES = ['/hero/1.webp', '/hero/2.webp', '/hero/3.webp', '/hero/4.webp'];
   const t = useT();
+
+  // 置顶动态同步到首页横幅（news 已按 置顶优先 + 日期 排序）
+  const pinnedNews = news.find((n) => n.pinned) ?? null;
 
   useEffect(() => {
     if (news.length < 2) return;
@@ -33,8 +34,6 @@ export default function HomeView({
     const tm = setInterval(() => setHeroIdx((i) => (i + 1) % HERO_IMAGES.length), 6000);
     return () => clearInterval(tm);
   }, []);
-
-  const trainingStatus = session ? sessionChip(session.status, t) : null;
 
   return (
     <main style={{ minHeight:'100vh', background:'var(--paper)', paddingTop:100 }}>
@@ -61,6 +60,19 @@ export default function HomeView({
       <div className="container" style={{ position:'relative', zIndex:1 }}>
         {announcement && (
           <div style={{ background:'#FFF6E0', border:'1px solid #EBD8A6', padding:'12px 18px', borderRadius:10, marginBottom:24, fontSize:14, color:'#7A5B0E' }}>📢 {announcement}</div>
+        )}
+        {pinnedNews && (
+          <div style={{ background:'rgba(255,255,255,0.94)', border:'1px solid var(--line)', padding:'12px 18px', borderRadius:10, marginBottom:24, fontSize:14, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+            <span className="chip chip-open" style={{ fontSize:12, flexShrink:0 }}>置顶</span>
+            <Link
+              href={pinnedNews.url || `/news/${pinnedNews.slug}`}
+              target={pinnedNews.url ? '_blank' : undefined}
+              rel={pinnedNews.url ? 'noopener noreferrer' : undefined}
+              style={{ color:'var(--ink)', textDecoration:'none', fontWeight:500 }}
+            >
+              {pinnedNews.title} →
+            </Link>
+          </div>
         )}
         <div className="hero-grid" style={{ display:'grid', gridTemplateColumns:'1.15fr 1fr', gap:48, alignItems:'stretch', marginBottom:0 }}>
           <div style={{ display:'flex', flexDirection:'column', justifyContent:'center' }}>
@@ -146,15 +158,14 @@ export default function HomeView({
             title={t('活动报名', 'Sign-up')}
             desc={t('零基础教学班、进阶训练、校园赛事等活动的报名入口都在这里，验证清华邮箱后即可报名。', 'Beginner classes, training, campus meets — all sign-ups live here, unlocked with a quick Tsinghua email verification.')}
             href="/training"
-            cta={(session?.status === 'open' ? t('前往报名', 'Register now') : t('查看本期活动', 'View current activities')) + ' →'}
-            statusChip={trainingStatus}
+            cta={t('前往报名', 'Register now') + ' →'}
           />
           <ModuleCard
             emoji="💬"
-            title={t('游泳社区', 'Swim Community')}
-            desc={t('加入协会微信群交流讨论，社区墙汇集精选求助、分享与约游内容。', 'Join our WeChat group for discussions — the community wall collects selected Q&A, sharing and meetups.')}
+            title={t('泳协社群', 'Our Community')}
+            desc={t('加入协会微信群：日常通知、约游组队、技术交流都在社群里进行。', 'Join our WeChat group — notices, meetups and technique chat all happen in the community.')}
             href="/community"
-            cta={t('进入社区', 'Enter community') + ' →'}
+            cta={t('加入社群', 'Join Us') + ' →'}
           />
         </div>
       </div>
@@ -162,19 +173,12 @@ export default function HomeView({
   );
 }
 
-function sessionChip(status: string, t: (zh: string, en?: string) => string) {
-  if (status === 'open') return { className:'chip chip-open', text:t('报名中', 'Open') };
-  if (status === 'full') return { className:'chip chip-full', text:t('名额已满', 'Full') };
-  return { className:'chip chip-closed', text:t('暂未开放', 'Closed') };
-}
-
-function ModuleCard({ emoji, title, desc, href, cta, statusChip }: any) {
+function ModuleCard({ emoji, title, desc, href, cta }: { emoji: string; title: string; desc: string; href: string; cta: string }) {
   return (
     <div className="card" style={{ padding:32, display:'flex', flexDirection:'column', gap:16 }}>
       <div style={{ fontSize:40 }}>{emoji}</div>
       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
         <h3 className="serif" style={{ fontSize:22, fontWeight:500 }}>{title}</h3>
-        {statusChip && <span className={statusChip.className}>{statusChip.text}</span>}
       </div>
       <p style={{ color:'#555', lineHeight:1.7, flex:1 }}>{desc}</p>
       <Link href={href} className="link-arrow">{cta}</Link>

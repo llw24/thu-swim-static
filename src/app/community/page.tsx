@@ -1,6 +1,6 @@
 import CommunityWall from '@/components/CommunityWall';
-import { getWall, getSite } from '@/lib/content';
+import { getSite } from '@/lib/content';
 
 export default function Page() {
-  return <CommunityWall wall={getWall()} site={getSite()} />;
+  return <CommunityWall site={getSite()} />;
 }

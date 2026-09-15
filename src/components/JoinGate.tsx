@@ -7,15 +7,23 @@ import { withBase } from '@/lib/content-shared';
 import type { SiteSettings } from '@/lib/content-shared';
 
 /**
- * 验证门 —— 社区页和 /join 页共用。
+ * 验证门 —— 进群（/join、社区页）和报名（/verify）共用的验证组件，用 variant 区分：
  *
- * 未验证：显示清华邮箱验证表单。
- * 已验证（含 30 天内回访）：显示企微群二维码 + 报名入口 + 管理员微信。
- * 带 ?next=signup 进来时，验证通过后自动跳转问卷星。
+ *  group  进群场景：验证后展示企微群二维码 + 管理员微信（报名入口作次要提示）
+ *  signup 报名场景：验证后自动跳转问卷星；不展示群二维码，保持目的纯粹
+ *
+ * 未验证时显示清华邮箱验证表单；30 天内回访凭本地凭证直接放行。
  */
-export default function JoinGate({ site }: { site: SiteSettings }) {
+export default function JoinGate({
+  site,
+  variant = 'group',
+}: {
+  site: SiteSettings;
+  variant?: 'group' | 'signup';
+}) {
   const t = useT();
   const { lang } = useLang();
+  const isSignup = variant === 'signup';
   const [payload, setPayload] = useState<JoinPayload | null>(null);
   const [probing, setProbing] = useState(true);
 
@@ -31,22 +39,14 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
     };
   }, []);
 
-  // 验证通过后按来源自动转跳：?next=signup → 问卷星报名表
+  // 报名场景：验证通过后自动跳转问卷星（链接来自老站，未验证拿不到）
   useEffect(() => {
-    if (!payload) return;
-    const next = new URLSearchParams(window.location.search).get('next');
-    if (next === 'signup' && payload.signupUrl) {
-      window.location.assign(payload.signupUrl);
-    }
-  }, [payload]);
-
-  const next = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('next') : null;
-  const autoJumping = !!payload && next === 'signup' && !!payload.signupUrl;
+    if (!payload || !isSignup) return;
+    if (payload.signupUrl) window.location.assign(payload.signupUrl);
+  }, [payload, isSignup]);
 
   // 应急通道：验证服务挂了/还没接入时的兜底提示
-  const emergency =
-    site.contactWechat ||
-    (site.wechatGroupQr ? t('社区页二维码（应急）', 'emergency QR below') : '');
+  const emergency = site.contactWechat;
 
   if (probing) {
     return (
@@ -60,7 +60,7 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
     <div className="card" style={{ padding: 28, marginBottom: 32 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
         <h2 className="serif" style={{ fontSize: 22, fontWeight: 500 }}>
-          {t('加入协会微信群', 'Join our WeChat group')}
+          {isSignup ? t('报名身份验证', 'Sign-up verification') : t('加入协会微信群', 'Join our WeChat group')}
         </h2>
         {payload && (
           <span className="chip chip-open" style={{ fontSize: 12 }}>
@@ -71,27 +71,70 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
 
       {!payload ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <p style={{ color: '#555', lineHeight: 1.8, fontSize: 14.5 }}>
-            {lang === 'en' ? site.communityIntroEn : site.communityIntroZh}
-          </p>
+          {!isSignup && (
+            <p style={{ color: '#555', lineHeight: 1.8, fontSize: 14.5 }}>
+              {lang === 'en' ? site.communityIntroEn : site.communityIntroZh}
+            </p>
+          )}
           <EmailOtpForm
-            purpose={t(
-              '协会微信群只对清华在校师生开放。先用清华邮箱验证一下身份，验证后这里会显示进群方式；报名时也不用再验证。',
-              'The group is open to Tsinghua students and staff only. Verify with your Tsinghua email to see how to join — no need to verify again when signing up.',
-            )}
+            purpose={
+              isSignup
+                ? t(
+                    '为保证活动名额留给清华在校同学，报名前需要验证一次清华邮箱。验证一次，30 天内进群和报名通用。',
+                    'To keep sign-ups Tsinghua-only, verify your Tsinghua email once — it also covers joining the WeChat group, valid for 30 days.',
+                  )
+                : undefined
+            }
             onVerified={setPayload}
           />
         </div>
-      ) : autoJumping ? (
-        <div style={{ color: '#555', fontSize: 14.5, lineHeight: 1.9 }}>
-          {t('验证通过 ✅ 正在前往报名表单…', 'Verified ✅ Taking you to the sign-up form…')}
-          <div style={{ marginTop: 12 }}>
-            <a href={payload.signupUrl} className="btn-primary" style={{ textDecoration: 'none' }}>
-              {t('如果没有自动跳转，点这里 →', 'Click here if not redirected →')}
-            </a>
+      ) : isSignup ? (
+        /* —— 报名场景的验证后状态 —— */
+        <div style={{ fontSize: 14.5, lineHeight: 1.9 }}>
+          {payload.signupUrl ? (
+            <>
+              <p style={{ color: '#333' }}>
+                {t('验证通过 ✅ 正在前往报名表单…', 'Verified ✅ Taking you to the sign-up form…')}
+              </p>
+              <div style={{ marginTop: 12 }}>
+                <a href={payload.signupUrl} className="btn-primary" style={{ textDecoration: 'none' }}>
+                  {t('如果没有自动跳转，点这里 →', 'Click here if not redirected →')}
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <p style={{ color: '#333' }}>
+                {t('验证通过 ✅ 但当前没有开放报名的活动。', 'Verified ✅ — but no sign-up is open right now.')}
+              </p>
+              <p style={{ color: 'var(--muted)', marginTop: 6 }}>
+                {t(
+                  '开放后回到「活动报名」页点击报名即可，无需再验证。也可以先加入社群等通知：',
+                  'Come back to the sign-up page when it opens — no need to verify again. Or join the group to get notified:',
+                )}{' '}
+                <a href="/join/" className="link-arrow">{t('加入社群 →', 'Join the group →')}</a>
+              </p>
+            </>
+          )}
+          <div style={{ marginTop: 18, fontSize: 12.5, color: 'var(--muted)' }}>
+            {t('已验证', 'Verified')}：{payload.email}
+            {' · '}
+            {t('有效期至', 'valid until')} {new Date(payload.expiresAt).toLocaleDateString('zh-CN')}
+            <button
+              type="button"
+              className="link-arrow"
+              onClick={() => {
+                clearProof();
+                setPayload(null);
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: 10, padding: 0 }}
+            >
+              {t('退出验证', 'Sign out')}
+            </button>
           </div>
         </div>
       ) : (
+        /* —— 进群场景的验证后状态 —— */
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {payload.groupQr ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -137,37 +180,6 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
                 <span style={{ display: 'block', color: '#555', marginTop: 6 }}>{payload.note}</span>
               )}
             </p>
-
-            {/* 报名入口（同一份验证凭证通用） */}
-            <div
-              style={{
-                border: '1px solid var(--line)',
-                borderRadius: 10,
-                padding: 14,
-                marginBottom: 14,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                flexWrap: 'wrap',
-              }}
-            >
-              <span style={{ fontSize: 14 }}>{t('近期活动报名', 'Current sign-up')}</span>
-              {payload.signupUrl ? (
-                <a
-                  href={payload.signupUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ textDecoration: 'none' }}
-                >
-                  {t('前往报名表单 →', 'Open sign-up form →')}
-                </a>
-              ) : (
-                <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-                  {t('暂未开放，敬请关注公告', 'Not open yet — watch for announcements')}
-                </span>
-              )}
-            </div>
 
             {payload.wechatId && (
               <p style={{ fontSize: 14, marginBottom: 10 }}>

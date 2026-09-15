@@ -74,10 +74,10 @@ function ItemBody({
   return (
     <>
       <div style={{ fontSize:36, marginBottom:12 }}>{n.emoji}</div>
-      <div style={{ fontSize:12, color:'var(--muted)', marginBottom:6 }}>
-        {n.date}
-        {n.pinned ? ` · ${t('置顶', 'Pinned')}` : ''}
-        {external ? ` · ${t('公众号文章', 'WeChat article')}` : ''}
+      <div style={{ fontSize:12, color:'var(--muted)', marginBottom:6, display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+        <span>{n.date}</span>
+        {n.pinned && <span className="chip chip-open" style={{ fontSize:11 }}>{t('置顶', 'Pinned')}</span>}
+        {external && <span>{t('公众号文章', 'WeChat article')}</span>}
       </div>
       <h3 className="serif" style={{ fontSize:18, fontWeight:500, marginBottom:8 }}>
         {n.title}{external ? ' ↗' : ''}
