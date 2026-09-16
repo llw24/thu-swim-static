@@ -13,8 +13,8 @@ export default function About() {
         <h2 className="serif" style={{ fontSize: 22, marginBottom: 12 }}>{t('我们是谁', 'Who we are')}</h2>
         <p style={{ color:'#333', lineHeight: 1.85, marginBottom: 14 }}>
           {t(
-            '清华大学学生游泳协会是经校团委批准、依托体育部及陈明游泳馆建立的学生社团，也是每年"马约翰杯"游泳比赛的承办单位。主要活动为开展群众性游泳运动、推广校园游泳文化。',
-            'The Tsinghua University Student Swimming Association is a student organization approved by the Youth League Committee, established under the Sports Department and based at Chen Ming Natatorium. We also organize the annual Ma Yuehan Cup swim meet. Our main activities include running community swimming sessions and promoting swimming culture on campus.'
+            '清华大学学生游泳协会是经校团委批准、依托体育部及陈明游泳馆建立的学生社团，也是每年"马约翰杯"游泳比赛的承办单位。平时主要组织大家游泳锻炼，同时推广校园游泳文化。',
+            'The Tsinghua University Student Swimming Association is a student organization approved by the Youth League Committee, established under the Sports Department and based at Chen Ming Natatorium. We also organize the annual Ma Yuehan Cup swim meet. Day to day, we run swim sessions for everyone on campus and work to grow swimming culture at Tsinghua.'
           )}
         </p>
         <p style={{ color:'#333', lineHeight: 1.85 }}>
