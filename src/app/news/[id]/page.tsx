@@ -6,7 +6,10 @@ import { getNews, renderBody } from '@/lib/content';
 /** 新闻详情 —— 每个 content/news/*.md 在构建时生成一个静态页面 */
 
 export function generateStaticParams() {
-  return getNews().map((n) => ({ id: n.slug }));
+  const items = getNews().map((n) => ({ id: n.slug }));
+  // ⚠️ 空列表时 output:export 会把本路由判定为"无法静态化"导致构建失败，
+  // 补一个占位参数：该页会调用 notFound() 渲染成 404，无副作用。
+  return items.length > 0 ? items : [{ id: '_' }];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

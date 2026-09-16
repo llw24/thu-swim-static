@@ -5,6 +5,7 @@ import {
   adminFile,
   adminGate,
   adminList,
+  adminProofPersisted,
   adminRemove,
   adminSave,
   clearAdminProof,
@@ -156,19 +157,21 @@ export default function AdminView() {
     setLoading(false);
   }
 
-  // 回访：本地 7 天凭证还在就直接进入
+  // 回访：本地 7 天凭证还在就直接进入；失败时把原因显示出来便于诊断
+  const [gateReason, setGateReason] = useState('');
   useEffect(() => {
     let alive = true;
     adminGate()
-      .then((p: AdminPayload | null) => {
+      .then((res) => {
         if (!alive) return;
-        if (p) {
-          setProof(p.proof);
-          setAdminEmail(p.email);
+        if (res.payload) {
+          setProof(res.payload.proof);
+          setAdminEmail(res.payload.email);
           setLoginState('ok');
-          refreshAll(p.proof);
+          refreshAll(res.payload.proof);
         } else {
           setLoginState('none');
+          setGateReason(res.reason || '未知原因');
         }
       })
       .catch(() => alive && setLoginState('none'));
@@ -183,6 +186,12 @@ export default function AdminView() {
     setAdminEmail(p.email);
     setLoginState('ok');
     refreshAll(p.proof);
+    // 自检：凭证是否真的存进了浏览器（排查"刷新就掉登录"）
+    setTimeout(() => {
+      if (!adminProofPersisted()) {
+        alert('提示：这个浏览器没有保存住登录状态（可能是无痕模式、或开启了阻止站点数据/清理插件）。刷新后需要重新验证。');
+      }
+    }, 300);
   }
 
   function logout() {
@@ -306,6 +315,11 @@ export default function AdminView() {
     return (
       <main className="container" style={{ padding: '110px 24px 60px', maxWidth: 720 }}>
         <h1 className="serif" style={{ fontSize: 32, marginBottom: 16 }}>🔧 管理员登录</h1>
+        {gateReason && (
+          <div style={{ background:'#FFF6E0', border:'1px solid #EBD8A6', borderRadius:10, padding:'10px 14px', fontSize:13, color:'#7A5B0E', marginBottom:16, lineHeight:1.7 }}>
+            🔎 上次登录校验失败：{gateReason}。把这段文字发给技术负责人可以快速定位。
+          </div>
+        )}
         <EmailOtpForm
           mode="admin"
           purpose="管理员用清华邮箱验证登录，无需 GitHub Token。只有白名单里的邮箱可以进入；需要开通请联系技术负责人。"

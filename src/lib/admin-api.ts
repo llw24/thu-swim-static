@@ -67,8 +67,9 @@ async function post(path: string, body: unknown, attempt = 0): Promise<unknown> 
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.error || `请求失败（${res.status}）`) as Error & { status?: number };
+    const err = new Error(data.error || `请求失败（${res.status}）`) as Error & { status?: number; reason?: string };
     err.status = res.status;
+    if (data.reason) err.reason = String(data.reason);
     throw err;
   }
   return data;
@@ -89,16 +90,24 @@ export async function verifyAdminCode<T extends VerifyPayload = AdminPayload>(
   return d;
 }
 
-/** 回访：用本地凭证确认身份；无效返回 null */
-export async function adminGate(): Promise<AdminPayload | null> {
+/** 登录后自检：凭证是否真的存进了浏览器 */
+export function adminProofPersisted(): boolean {
+  try { return !!localStorage.getItem(LS_KEY); } catch { return false; }
+}
+
+/** 回访：用本地凭证确认身份。失败时带原因（用于诊断"刷新就掉登录"） */
+export async function adminGate(): Promise<{ payload: AdminPayload | null; reason?: string }> {
   const proof = storedProof();
-  if (!proof) return null;
+  if (!proof) {
+    return { payload: null, reason: '本地没有保存到登录凭证 —— 浏览器可能没有存住站点数据（无痕模式/安全设置/清理插件）' };
+  }
   try {
     const d = (await post('/api/admin/gate', { proof })) as AdminPayload;
     storeProof(d.proof, d.expiresAt);
-    return d;
-  } catch {
-    return null;
+    return { payload: d };
+  } catch (e) {
+    const err = e as Error & { reason?: string };
+    return { payload: null, reason: err.reason || err.message };
   }
 }
 
