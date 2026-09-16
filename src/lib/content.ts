@@ -77,14 +77,14 @@ export function renderBody(item: { body: string }): string {
 
 // -------------------------------------------------------------- 零基础班
 
-const STATUS_ORDER: Record<SessionStatus, number> = { open: 0, full: 1, closed: 2 };
+const STATUS_ORDER: Record<SessionStatus, number> = { open: 0, full: 1, upcoming: 2, closed: 3 };
 
 export function getSessions(): SessionItem[] {
   return readDir('sessions')
     .map((d) => ({
       slug: d.slug,
       title: String(d.front.title ?? d.slug),
-      status: (['open', 'full', 'closed'].includes(d.front.status)
+      status: ((['open', 'full', 'upcoming', 'closed'].includes(d.front.status))
         ? d.front.status
         : 'closed') as SessionStatus,
       description: String(d.front.description ?? ''),

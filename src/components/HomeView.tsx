@@ -86,7 +86,7 @@ export default function HomeView({
             </p>
             <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
               <Link href="/about" className="btn-primary">{t('了解更多', 'Learn more')} →</Link>
-              <Link href="/community" className="btn-secondary hero-btn-secondary">{t('加入社区', 'Join community')}</Link>
+              <Link href="/community" className="btn-secondary hero-btn-secondary">{t('加入社群', 'Join our community')}</Link>
             </div>
           </div>
 

@@ -54,7 +54,7 @@ const SCHEMA: Record<Module, {
       { key: 'title', zh: '活动名称', type: 'text' },
       {
         key: 'status', zh: '状态', type: 'select',
-        options: [['open', '报名中'], ['full', '名额已满'], ['closed', '已结束']],
+        options: [['open', '报名中'], ['full', '名额已满'], ['upcoming', '即将开展（预告）'], ['closed', '已结束']],
       },
       { key: 'description', zh: '活动简介', type: 'text' },
       { key: 'schedule', zh: '活动时间', type: 'text' },
