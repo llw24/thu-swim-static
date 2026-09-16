@@ -74,8 +74,8 @@ export default function HomeView({
             </h1>
             <p className="hero-lead" style={{ fontSize:17, lineHeight:1.75, marginBottom:20, maxWidth:560 }}>
               {t(
-                '我们是经校团委批准、依托体育部及陈明游泳馆建立的正规学生社团，也是每年"马约翰杯"游泳比赛的承办单位。四十年来，协会以推广校园游泳文化、教零基础同学从怕水到自如、服务校队与代表队为宗旨。',
-                'We are an officially recognized student organization approved by the Youth League Committee and hosted at Chen Ming Natatorium. As the organizer of the annual Ma Yuehan Cup swim meet, we have spent the past four decades promoting swim culture on campus, teaching beginners to swim confidently, and supporting the university teams.'
+                '我们是经校团委批准、依托体育部及陈明游泳馆建立的学生社团，也是每年"马约翰杯"游泳比赛的承办单位。主要活动为开展群众性游泳运动、推广校园游泳文化。',
+                'We are a student organization approved by the Youth League Committee, established under the Sports Department and based at Chen Ming Natatorium, and we organize the annual Ma Yuehan Cup swim meet. Our main activities include running community swimming sessions and promoting swimming culture on campus.'
               )}
             </p>
             <p className="hero-lead" style={{ lineHeight:1.75, marginBottom:28, maxWidth:560 }}>
