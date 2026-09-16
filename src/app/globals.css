@@ -184,7 +184,8 @@ a { color: inherit; }
 .hero-bg .hero-arrow:hover { background: rgba(255,255,255,0.32); }
 .hero-arrow-left { left: 20px; }
 .hero-arrow-right { right: 20px; }
-.hero-dots { position: absolute; bottom: 18px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 2; }
+.hero-dots { position: absolute; bottom: 18px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 2; pointer-events: none; }
+.hero-dot { pointer-events: auto; }
 .hero-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); border: none; padding: 0; cursor: pointer; transition: all .2s; }
 .hero-dot.active { background: #fff; width: 22px; border-radius: 4px; }
 
