@@ -1,8 +1,16 @@
 # 项目交接文档（给未来的技术负责人 / 新会话的 AI 助手）
 
-> 最后更新：2026-09-16。
+> 最后更新：2026-09-20。
 > 本文是项目的**完整现状快照**。新接手的人（或新开的 AI 会话）先读完这份，
 > 再按需查《网站整体方案.md》《管理员使用手册.md》和两个仓库的 git 历史。
+>
+> **2026-09-20 更新**：①报名功能已下线，「活动预告」改造完成（/verify 页、JoinGate
+> signup 分支、报名状态/问卷星入口全删，活动只剩 upcoming/closed 两种状态）；
+> ②两仓库依赖升级（next 16.2.10→16.3.5、dompurify→3.4.15，npm audit 清零，
+> 老站仅剩 @coze/api→uuid 2 条 moderate，修复需跨大版本升级 Coze SDK，暂缓）；
+> ③老站 devCode 改为只在非生产环境返回（生产未配邮件 = 503，防验证码回显被冒名）；
+> ④静态站 publish workflow 的 Issue 标题注入已修（改走环境变量）；
+> ⑤AGENTS.md 新增「内容更新流程」——管理员现在直接跟 AI 说要发什么，AI 改 content/ 并推送。
 
 ---
 
@@ -31,7 +39,7 @@
 | 内容展示 | 静态站 `content/*.md` | 新闻/活动/社区墙，管理员通过 Issue 表单或 `/admin` 维护 |
 | **进群验证** | `/join/` → 老站 `/api/auth/request-code` + `/api/join/verify` | 只接受清华邮箱；验证通过才显示企微群二维码（码存老站 `site_settings` 表，不在公开仓库） |
 | **管理页邮箱登录** | `/admin/` → 老站 `/api/admin/verify` + `/api/admin/content` | 清华邮箱 + 白名单（`ADMIN_EMAILS` 环境变量 / `admins` 表 / `SUPER_ADMIN_EMAIL`）→ 7 天凭证；内容读写由老站用 `ADMIN_GITHUB_TOKEN` 代理提交 GitHub |
-| 活动预告 | `/training/`（页面名「活动预告」） | 横向胶囊栏 + 点击展开详情；状态：报名中/名额已满/即将开展(upcoming)/已结束 |
+| 活动预告 | `/training/`（页面名「活动预告」） | 只做活动介绍：即将开展（可展开详情）+ 往期回顾；**无站内报名**，报名在微信群接龙 |
 | 动态 | `/news/` | 公众号文章链接导流 + 公众号二维码 |
 | AI 小助手 | Coze 悬浮窗 | ⚠️ **静态站上目前是坏的**（`/api/coze/token` 不存在），见 §七 |
 

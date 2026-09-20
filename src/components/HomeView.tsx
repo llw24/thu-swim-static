@@ -143,14 +143,14 @@ export default function HomeView({
 
       <div className="container">
         <h2 className="serif" style={{ fontSize:32, textAlign:'center', marginBottom:12, fontWeight:400 }}>{t('协会为你提供', 'What we offer')}</h2>
-        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('活动报名 · 加入社群 · 校园赛事，一个入口全部搞定', 'Sign-ups · Community · Campus meets — all in one place')}</p>
+        <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>{t('活动预告 · 加入社群 · 校园赛事', 'Events · Community · Campus meets')}</p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px,1fr))', gap:24, marginBottom:80 }}>
           <ModuleCard
             emoji="🏊‍♀️"
-            title={t('活动报名', 'Sign-up')}
-            desc={t('零基础教学班、进阶训练、校园赛事等活动的报名入口都在这里，验证清华邮箱后即可报名。', 'Beginner classes, training, campus meets — all sign-ups live here, unlocked with a quick Tsinghua email verification.')}
+            title={t('活动预告', 'Events')}
+            desc={t('教学班、训练、校内赛事、体验活动的预告与回顾都在这里，参加方式在协会微信群内通知。', 'Previews and recaps of classes, training, campus meets and taster sessions — details are announced in our WeChat group.')}
             href="/training"
-            cta={t('前往报名', 'Register now') + ' →'}
+            cta={t('查看预告', 'View events') + ' →'}
           />
           <ModuleCard
             emoji="💬"

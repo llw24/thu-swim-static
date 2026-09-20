@@ -11,7 +11,7 @@ import { renderMarkdown } from './markdown';
  *
  * 每个功能模块对应 content/ 下一个文件夹：
  *   content/news/*.md      新闻
- *   content/sessions/*.md  活动期次（开放报名的活动）
+ *   content/sessions/*.md  活动（预告与回顾）
  *   content/wall/*.md      社区墙精选外链
  *   content/site.json      全站设置
  *
@@ -77,21 +77,20 @@ export function renderBody(item: { body: string }): string {
 
 // -------------------------------------------------------------- 零基础班
 
-const STATUS_ORDER: Record<SessionStatus, number> = { open: 0, full: 1, upcoming: 2, closed: 3 };
+const STATUS_ORDER: Record<SessionStatus, number> = { upcoming: 0, closed: 1 };
 
 export function getSessions(): SessionItem[] {
   return readDir('sessions')
     .map((d) => ({
       slug: d.slug,
       title: String(d.front.title ?? d.slug),
-      status: ((['open', 'full', 'upcoming', 'closed'].includes(d.front.status))
+      status: ((['upcoming', 'closed'].includes(d.front.status))
         ? d.front.status
         : 'closed') as SessionStatus,
       description: String(d.front.description ?? ''),
       schedule: String(d.front.schedule ?? ''),
       location: String(d.front.location ?? ''),
       price: String(d.front.price ?? ''),
-      registerUrl: String(d.front.registerUrl ?? ''),
       qr: String(d.front.qr ?? ''),
       featured: d.front.featured === true,
     }))

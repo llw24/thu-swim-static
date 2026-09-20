@@ -35,6 +35,9 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
 
       - name: 提交并推送
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           git config user.name "tssa-bot"
           git config user.email "41898282+tssa-bot@users.noreply.github.com"
@@ -43,7 +46,8 @@ jobs:
             echo "::notice::没有产生内容变更"
             exit 0
           fi
-          git commit -m "发布(#${{ github.event.issue.number }})：${{ github.event.issue.title }}"
+          # 标题经环境变量传入，避免 Issue 标题注入 Shell 命令
+          git commit -m "发布(#$ISSUE_NUMBER)：$ISSUE_TITLE"
           git push
 
       - name: 关闭 Issue 并留言

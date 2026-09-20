@@ -101,8 +101,8 @@ export default function EmailOtpForm<T extends PayloadShape>({
       <p style={{ color: '#555', fontSize: 14, lineHeight: 1.8, marginBottom: 20 }}>
         {purpose ??
           t(
-            '为保证群里和报名的同学都是清华在校师生，需要先用清华邮箱验证一次。验证结果 30 天内有效。',
-            'To keep the group and sign-ups Tsinghua-only, verify with your Tsinghua email once — valid for 30 days.',
+            '为保证群里和活动的同学都是清华在校师生，需要先用清华邮箱验证一次。验证结果 30 天内有效。',
+            'To keep the group and events Tsinghua-only, verify with your Tsinghua email once — valid for 30 days.',
           )}
       </p>
 

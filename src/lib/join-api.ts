@@ -2,7 +2,7 @@
  * 老站验证服务的浏览器端客户端。
  *
  * 老站（thu-swim.netlify.app）瘦身后只干一件事：验证清华邮箱，
- * 通过后返回"验证后可见内容"（企微群二维码 / 问卷星报名链接 / 微信号）。
+ * 通过后返回"验证后可见内容"（企微群二维码 / 微信号）。
  *
  * 凭证（proof）存 localStorage，30 天内回访免重复验证；
  * 过期或无效时接口返回 401，上层会退回验证表单。
@@ -23,8 +23,6 @@ export type JoinPayload = VerifyPayload & {
   ok: true;
   /** 企微群二维码 dataURL；留空表示尚未接入 */
   groupQr: string;
-  /** 问卷星报名链接；留空表示报名暂未开放 */
-  signupUrl: string;
   /** 管理员微信号（备用入口） */
   wechatId: string;
   /** 验证通过后显示的说明 */

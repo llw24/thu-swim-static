@@ -13,12 +13,12 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: '清华大学学生游泳协会 · Tsinghua Swimming Association',
-  description: '清华大学学生游泳协会官方网站 · 活动报名 · 加入社群 · 校园赛事',
+  description: '清华大学学生游泳协会官方网站 · 活动预告 · 加入社群 · 校园赛事',
   manifest: withBase('/manifest.webmanifest'),
   icons: { icon: withBase('/icon.svg'), apple: withBase('/icon.svg') },
   openGraph: {
     title: '清华大学学生游泳协会',
-    description: '活动报名 · 加入社群 · 校园赛事',
+    description: '活动预告 · 加入社群 · 校园赛事',
     type: 'website',
     images: [withBase('/og-image.svg')],
   },

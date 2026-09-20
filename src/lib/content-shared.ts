@@ -53,7 +53,7 @@ export function isTsinghuaEmail(email: string): boolean {
 
 // -------------------------------------------------------------- 零基础班
 
-export type SessionStatus = 'open' | 'full' | 'upcoming' | 'closed';
+export type SessionStatus = 'upcoming' | 'closed';
 
 export type SessionItem = {
   slug: string;
@@ -63,7 +63,6 @@ export type SessionItem = {
   schedule: string;
   location: string;
   price: string;
-  registerUrl: string;
   qr: string;
   featured: boolean;
 };

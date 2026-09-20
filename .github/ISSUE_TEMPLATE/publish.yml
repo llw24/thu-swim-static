@@ -14,7 +14,7 @@ body:
     attributes:
       label: 标题
       description: 新闻或课程的标题
-      placeholder: 如：2026 马约翰杯游泳赛报名开始
+      placeholder: 如：2026 马约翰杯游泳比赛回顾
     validations: { required: true }
 
   - type: input
@@ -56,23 +56,16 @@ body:
     validations: { required: true }
 
   - type: input
-    id: registerUrl
-    attributes:
-      label: 报名表单链接（仅活动）
-      placeholder: https://docs.qq.com/form/page/xxxxx
-    validations: { required: false }
-
-  - type: input
     id: schedule
     attributes:
-      label: 上课时间（仅活动）
+      label: 活动时间（仅活动）
       placeholder: 每周二 / 周四晚 19:00–20:30
     validations: { required: false }
 
   - type: input
     id: location
     attributes:
-      label: 上课地点（仅活动）
+      label: 活动地点（仅活动）
       placeholder: 陈明游泳馆
     validations: { required: false }
 
@@ -86,8 +79,8 @@ body:
   - type: dropdown
     id: status
     attributes:
-      label: 课程状态（仅活动）
-      options: [报名中, 名额已满, 已结束]
+      label: 活动状态（仅活动）
+      options: [即将开展, 已结束]
     validations: { required: false }
 
   - type: input

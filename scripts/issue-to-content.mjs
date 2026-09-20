@@ -54,7 +54,7 @@ const summary = f['摘要'] || '';
 const emoji = f['表情符号'] || '';
 const body = f['正文'] || '';
 const pinned = typeof f['置顶'] === 'string' && f['置顶'].includes('[x]');
-const statusMap = { '报名中': 'open', '名额已满': 'full', '已结束': 'closed' };
+const statusMap = { '即将开展': 'upcoming', '已结束': 'closed' };
 const catMap = { '分享': 'share', '求助': 'question', '约游': 'buddy' };
 
 /** 组装 front matter */
@@ -77,9 +77,8 @@ switch (dir) {
     add('schedule', JSON.stringify(f['上课时间'] || ''));
     add('location', JSON.stringify(f['上课地点'] || ''));
     add('price', JSON.stringify(f['费用'] || ''));
-    add('registerUrl', f['报名表单链接'] || '');
     add('featured', 'false');
-    frontBody = body || '报名方式见课程卡片上的报名按钮。';
+    frontBody = body || '参加方式以协会微信群内通知为准。';
     break;
   case 'wall':
     add('title', JSON.stringify(title));
