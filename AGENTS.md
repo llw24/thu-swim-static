@@ -17,7 +17,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - `content/sessions/*.md` —— 活动（预告与回顾，**没有站内报名**，报名在微信群）。
   front matter：`title`、`status: upcoming | closed`、`description`、`schedule`、
-  `location`、`price`、`qr`（活动群二维码路径，一般留空）；正文为详细说明（选填）。
+  `location`、`price`、`qr`（活动群二维码路径，一般留空）、`order`（选填数字，
+  越小越靠前，想固定多张卡片顺序时用）；正文为详细说明（选填）。
   ⚠️ `open`/`full`/`registerUrl`/`featured` 及一切新闻/社区墙字段已废弃，别再生成。
 - `content/site.json` —— 全站设置（公告横幅、联系方式、giscus）。
 

@@ -47,6 +47,8 @@ export type SessionItem = {
   location: string;
   price: string;
   qr: string;
+  /** 展示顺序（数字越小越靠前，默认 0；同状态内先按 order 再按标题） */
+  order: number;
 };
 
 // ------------------------------------------------------------ 全站设置

@@ -54,8 +54,14 @@ export function getSessions(): SessionItem[] {
       location: String(d.front.location ?? ''),
       price: String(d.front.price ?? ''),
       qr: String(d.front.qr ?? ''),
+      order: Number(d.front.order ?? 0) || 0,
     }))
-    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
+    .sort(
+      (a, b) =>
+        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
+        a.order - b.order ||
+        a.title.localeCompare(b.title, 'zh-Hans-CN'),
+    );
 }
 
 // ------------------------------------------------------------ 全站设置
