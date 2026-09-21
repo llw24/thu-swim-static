@@ -119,7 +119,7 @@ export default function EmailOtpForm<T extends PayloadShape>({
               autoCapitalize="none"
               autoCorrect="off"
               inputMode="email"
-              placeholder={t('学号或用户名', 'student ID or username')}
+              aria-label={t('清华邮箱用户名', 'Tsinghua email username')}
               value={emailUser}
               onChange={(e) => setEmailUser(e.target.value)}
               style={{ flex: 1, minWidth: 0 }}
