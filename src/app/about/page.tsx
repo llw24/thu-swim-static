@@ -2,46 +2,95 @@
 import Link from 'next/link';
 import { useT } from '@/lib/i18n';
 
+/** 标签 + 内容的一行说明（人群/配置/模式/报名 用） */
+function InfoRow({ k, v }: { k: string; v: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 14, fontSize: 14.5, lineHeight: 1.85 }}>
+      <span style={{ color: 'var(--muted)', minWidth: 44, flexShrink: 0, fontWeight: 500 }}>{k}</span>
+      <span style={{ color: '#333', flex: 1 }}>{v}</span>
+    </div>
+  );
+}
+
 export default function About() {
   const t = useT();
   return (
-    <main className="container" style={{ padding:'110px 24px 60px', maxWidth: 820 }}>
+    <main className="container" style={{ padding: '110px 24px 60px', maxWidth: 860 }}>
       <p className="eyebrow" style={{ marginBottom: 10 }}>About</p>
-      <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, marginBottom: 24 }}>{t('关于协会', 'About the Association')}</h1>
+      <h1 className="serif" style={{ fontSize: 36, fontWeight: 400, marginBottom: 28 }}>{t('关于协会', 'About the Association')}</h1>
 
+      {/* ------------------------------ 我们做什么 ------------------------------ */}
       <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-        <h2 className="serif" style={{ fontSize: 22, marginBottom: 12 }}>{t('我们是谁', 'Who we are')}</h2>
-        <p style={{ color:'#333', lineHeight: 1.85, marginBottom: 14 }}>
-          {t(
-            '清华大学学生游泳协会是经校团委批准、依托体育部及陈明游泳馆建立的学生社团，也是每年"马约翰杯"游泳比赛的承办单位。主要社团活动为开展群众游泳活动以及推广校园游泳文化。',
-            'The Tsinghua University Student Swimming Association is a student organization approved by the Youth League Committee, established under the Sports Department and based at Chen Ming Natatorium. We also organize the annual Ma Yuehan Cup swim meet. Day to day, we run swim sessions for everyone on campus and work to grow swimming culture at Tsinghua.'
-          )}
-        </p>
-        <p style={{ color:'#333', lineHeight: 1.85 }}>
-          {t(
-            '我们相信游泳是一项能陪伴终身的运动，也是清华同学在紧张学习之余最好的放松方式之一。在这里，你可以找到教零基础的耐心教练、可以求教技术难题、可以约到一同下水的伙伴。',
-            'We believe swimming is a lifelong sport and one of the best ways for Tsinghua students to unwind. Here you will find patient coaches for beginners, expert help on technique, and companions for your next swim.'
-          )}
+        <h2 className="serif" style={{ fontSize: 24, marginBottom: 20 }}>{t('我们做什么', 'What we do')}</h2>
+
+        <h3 className="serif" style={{ fontSize: 19, fontWeight: 500, margin: '4px 0 14px' }}>{t('一、日常活动', 'I. Regular activities')}</h3>
+
+        {/* 1. 零基础班 */}
+        <div style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '18px 20px', marginBottom: 14 }}>
+          <h4 className="serif" style={{ fontSize: 17, fontWeight: 500, marginBottom: 10 }}>
+            {t('1. 零基础蛙泳、自由泳班', '1. Beginner breaststroke & freestyle class')}
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <InfoRow k={t('人群', 'Who')} v={t(
+              '还未学会游泳，但有意愿付出时间和精力去学习游泳。',
+              'Students who cannot swim yet but are willing to put in the time and effort to learn.',
+            )} />
+            <InfoRow k={t('配置', 'Coaching')} v={t(
+              '由游泳馆提供一名具有游泳教练资格证的教练来进行教学。',
+              'Taught by a certified swimming coach provided by the natatorium.',
+            )} />
+            <InfoRow k={t('模式', 'Format')} v={t(
+              '以学习蛙泳、自由泳为主。每节课所学内容不同，教练会由浅入深一步步进行教学。',
+              'Focuses on breaststroke and freestyle. Each lesson covers new ground, with the coach teaching step by step from shallow to deep.',
+            )} />
+            <InfoRow k={t('报名', 'Sign-up')} v={t(
+              '为方便教学管理，本学期实行以一个月为一期的活动形式，共 3 期。每期 8 次课，每周两次，分别为报名月份的每周四下午 3:15–4:30 和周日上午 9:30–10:45。每期只能容纳 20 名左右（根据教练情况而定），实行先到先得的原则，每期会通过群聊内小程序进行报名，若报名成功则会有负责人联系。',
+              'For easier management, this term runs in monthly sessions — 3 in total. Each session has 8 lessons, twice a week: Thursdays 15:15–16:30 and Sundays 9:30–10:45 of the sign-up month. Each session holds about 20 swimmers (depending on coaching), first come first served. Sign up via the mini-program in the group chat; if you get in, an organizer will contact you.',
+            )} />
+          </div>
+        </div>
+
+        {/* 2. 提高区 */}
+        <div style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '18px 20px' }}>
+          <h4 className="serif" style={{ fontSize: 17, fontWeight: 500, marginBottom: 10 }}>
+            {t('2. 提高区', '2. Improvement lane')}
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <InfoRow k={t('人群', 'Who')} v={t(
+              '已经学会一种泳姿的同学。',
+              'Students who have already mastered one stroke.',
+            )} />
+            <InfoRow k={t('配置', 'Coaching')} v={t(
+              '一至两名游泳馆教练员或游泳校队成员或外校拥有教练员证的同学。',
+              'One or two natatorium coaches, members of the university swim team, or externally certified coaches.',
+            )} />
+            <InfoRow k={t('模式', 'Format')} v={t(
+              '进行各种泳姿教学、答疑，每节课所学内容不同，教练会由浅入深根据学员情况进行教学。',
+              'Teaching and Q&A on all strokes. Each lesson covers new ground, with coaching tailored to your level.',
+            )} />
+            <InfoRow k={t('报名', 'Sign-up')} v={t(
+              '通过群聊内小程序报名，每周两次，分别为每周四下午 3:15–4:30 和周日上午 9:30–10:45。每期只能容纳 20 人左右，实行先到先得的原则，每次通过群聊内小程序进行报名，若报名成功则会有负责人联系。',
+              'Sign up each time via the mini-program in the group chat. Lessons run twice a week — Thursdays 15:15–16:30 and Sundays 9:30–10:45 — with about 20 spots each, first come first served. If you get in, an organizer will contact you.',
+            )} />
+          </div>
+        </div>
+
+        <h3 className="serif" style={{ fontSize: 19, fontWeight: 500, margin: '24px 0 10px' }}>{t('二、承办赛事', 'II. Events we host')}</h3>
+        <p style={{ color: '#333', lineHeight: 1.85, fontSize: 14.5 }}>
+          <strong>{t('马约翰杯游泳赛', 'Ma Yuehan Cup Swim Meet')}</strong>
+          {t('：每年秋季学期承办校级游泳赛事。', ': the university-level swim meet, hosted every fall term.')}
         </p>
       </div>
 
-      <div className="card" style={{ padding: 32, marginBottom: 24 }}>
-        <h2 className="serif" style={{ fontSize: 22, marginBottom: 12 }}>{t('我们做什么', 'What we do')}</h2>
-        <ul style={{ color:'#333', lineHeight: 1.9, paddingLeft: 22 }}>
-          <li><strong>{t('零基础班', 'Beginner Class')}</strong>：{t('每学期开设蛙泳、自由泳等多个班次，八次课带你从怕水到独立游 25 米。', 'Breaststroke and freestyle sections each term. Eight sessions take you from fearing the water to swimming 25m on your own.')}</li>
-          <li><strong>{t('校内游泳社区', 'Campus Swim Community')}</strong>：{t('技术求助、分享、约游三大版块，认证队员和教练为你解答。', 'Three boards — technique Q&A, sharing, meetups — with answers from certified members and coaches.')}</li>
-          <li><strong>{t('马约翰杯游泳赛', 'Ma Yuehan Cup')}</strong>：{t('每年秋季学期承办校级游泳赛事。', 'We host the university swim meet every fall term.')}</li>
-          <li><strong>{t('校队与代表队服务', 'Support for university teams')}</strong>：{t('为清华游泳队与游泳代表队提供后勤与训练支持。', 'Logistics and training support for the Tsinghua swim team and varsity squad.')}</li>
-        </ul>
-      </div>
-
+      {/* ------------------------------ 联系我们 ------------------------------ */}
       <div className="card" style={{ padding: 32 }}>
-        <h2 className="serif" style={{ fontSize: 22, marginBottom: 12 }}>{t('联系我们', 'Contact us')}</h2>
-        <p style={{ color:'#555', lineHeight: 1.8 }}>
-          {t('有加入协会、合作或其他咨询，欢迎通过', 'To join the association, propose a collaboration, or ask anything else, please post in the ')}
-          <Link href="/community" className="link-arrow">{t('社区', 'community')}</Link>
-          {t('发帖联系，或联系协会理事会成员。', ' or reach out to a board member.')}
+        <h2 className="serif" style={{ fontSize: 24, marginBottom: 12 }}>{t('联系我们', 'Contact us')}</h2>
+        <p style={{ color: '#333', lineHeight: 1.85, marginBottom: 18 }}>
+          {t('欢迎加入游泳协会社群', 'Come join the TSSA community')}
         </p>
+        <Link href="/community" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+          {t('加入社群 →', 'Join us →')}
+        </Link>
       </div>
     </main>
   );
