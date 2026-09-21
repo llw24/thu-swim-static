@@ -53,13 +53,6 @@ export type SessionItem = {
 
 // ------------------------------------------------------------ 全站设置
 
-export type GiscusConfig = {
-  repo: string;
-  repoId: string;
-  category: string;
-  categoryId: string;
-};
-
 export type SiteSettings = {
   announcement: string;
   contactEmail: string;
@@ -68,5 +61,4 @@ export type SiteSettings = {
   /** 社区墙顶部的微信群二维码/进群说明 */
   communityIntroZh: string;
   communityIntroEn: string;
-  giscus: GiscusConfig;
 };

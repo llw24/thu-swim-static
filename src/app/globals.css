@@ -31,6 +31,12 @@ a { color: inherit; }
 .btn-ghost { display: inline-flex; align-items:center; gap:6px; padding: 8px 16px; color: var(--aqua); border-radius: 9999px; font-weight:500; cursor:pointer; background: transparent; border:0; }
 .input { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: white; font-size: 14px; font-family: inherit; }
 .input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(14,124,134,.12); }
+/* 邮箱验证：用户名 + 后缀下拉。窄屏改上下堆叠，避免输入框被挤扁 */
+.otp-row { display: flex; gap: 8px; }
+@media (max-width: 520px) {
+  .otp-row { flex-direction: column; align-items: stretch; }
+  .otp-row > .input { width: 100% !important; flex: none !important; }
+}
 .label { display:block; font-size: 13px; color: #333; font-weight: 500; margin-bottom: 6px; }
 
 /* Badges */

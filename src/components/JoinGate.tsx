@@ -67,9 +67,8 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
               src={payload.groupQr}
               alt={t('协会微信群二维码', 'WeChat group QR')}
               style={{
-                width: 190,
-                height: 190,
-                objectFit: 'contain',
+                width: 240,
+                height: 'auto',
                 borderRadius: 10,
                 border: '1px solid var(--line)',
                 background: 'white',

@@ -20,7 +20,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
   `location`、`price`、`qr`（活动群二维码路径，一般留空）、`order`（选填数字，
   越小越靠前，想固定多张卡片顺序时用）；正文为详细说明（选填）。
   ⚠️ `open`/`full`/`registerUrl`/`featured` 及一切新闻/社区墙字段已废弃，别再生成。
-- `content/site.json` —— 全站设置（公告横幅、联系方式、giscus）。
+- `content/site.json` —— 全站设置（公告横幅、联系方式）。
 
 文件名：`标题-随机后缀.md`（如 `新生体验课-m3x9a.md`）；字符串值用 JSON.stringify 写进
 front matter（保证 YAML 安全）。

@@ -111,13 +111,14 @@ export default function EmailOtpForm<T extends PayloadShape>({
           <label style={{ fontSize: 13, color: 'var(--muted)' }}>
             {t('清华邮箱', 'Tsinghua email')}
           </label>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="otp-row">
             <input
               className="input"
               type="text"
               required
               autoCapitalize="none"
               autoCorrect="off"
+              inputMode="email"
               placeholder={t('学号或用户名', 'student ID or username')}
               value={emailUser}
               onChange={(e) => setEmailUser(e.target.value)}

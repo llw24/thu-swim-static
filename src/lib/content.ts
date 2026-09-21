@@ -75,7 +75,6 @@ export function getSite(): SiteSettings {
     wechatGroupQr: '',
     communityIntroZh: '',
     communityIntroEn: '',
-    giscus: { repo: '', repoId: '', category: '', categoryId: '' },
   };
   try {
     return { ...empty, ...JSON.parse(fs.readFileSync(file, 'utf-8')) };
