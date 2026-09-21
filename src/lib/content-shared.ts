@@ -64,7 +64,6 @@ export type SessionItem = {
   location: string;
   price: string;
   qr: string;
-  featured: boolean;
 };
 
 // -------------------------------------------------------------- 社区墙

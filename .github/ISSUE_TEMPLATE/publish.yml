@@ -36,7 +36,7 @@ body:
     id: pinned
     attributes:
       label: 置顶
-      description: 仅对「新闻」生效：勾选后这条动态会排在最前并常驻首页轮播首位
+      description: 仅对「新闻」生效：勾选后这条动态会排在动态页最前
       options:
         - label: 置顶显示
 

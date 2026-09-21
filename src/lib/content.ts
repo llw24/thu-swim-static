@@ -92,18 +92,8 @@ export function getSessions(): SessionItem[] {
       location: String(d.front.location ?? ''),
       price: String(d.front.price ?? ''),
       qr: String(d.front.qr ?? ''),
-      featured: d.front.featured === true,
     }))
     .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
-}
-
-/** 上首页展示的那一期（featured 优先，否则取第一个非 closed 的） */
-export function getFeaturedSession(): SessionItem | null {
-  const all = getSessions();
-  return all.find((s) => s.featured && s.status !== 'closed')
-    ?? all.find((s) => s.status !== 'closed')
-    ?? all[0]
-    ?? null;
 }
 
 // -------------------------------------------------------------- 社区墙

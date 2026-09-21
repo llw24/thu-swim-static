@@ -16,11 +16,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 内容全是带 YAML front matter 的 markdown，放 `content/` 对应子目录：
 
 - `content/news/*.md` —— 新闻/动态。front matter：`title`（JSON 字符串）、`date`
-  （YYYY-MM-DD）、`summary`、`emoji`、`pinned: true`（置顶首页）、`url`（公众号文章
-  外链，填了列表直接跳外链）、`draft: true`（草稿不公开）；正文为 markdown。
+  （YYYY-MM-DD）、`summary`、`emoji`、`pinned: true`（置顶：排在动态页最前）、`url`
+  （公众号文章外链，填了列表直接跳外链）、`draft: true`（草稿不公开）；正文为 markdown。
 - `content/sessions/*.md` —— 活动。**只做预告/回顾，没有站内报名**（报名在微信群）。
   front matter：`title`、`status: upcoming | closed`、`description`、`schedule`、
-  `location`、`price`、`qr`（活动群二维码路径，一般留空）、`featured: true`（上首页）；
+  `location`、`price`、`qr`（活动群二维码路径，一般留空）；
   正文是详细介绍。⚠️ `open`/`full`/`registerUrl` 已废弃，别再生成。
 - `content/wall/*.md` —— 社区墙外链（现在主要走动态页，较少用）。
 - `content/site.json` —— 全站设置（公告横幅、联系方式、公众号、giscus）。

@@ -77,7 +77,6 @@ switch (dir) {
     add('schedule', JSON.stringify(f['上课时间'] || ''));
     add('location', JSON.stringify(f['上课地点'] || ''));
     add('price', JSON.stringify(f['费用'] || ''));
-    add('featured', 'false');
     frontBody = body || '参加方式以协会微信群内通知为准。';
     break;
   case 'wall':

@@ -43,7 +43,7 @@ const SCHEMA: Record<Module, {
       { key: 'date', zh: '日期', type: 'text' },
       { key: 'summary', zh: '摘要（显示在卡片上）', type: 'text' },
       { key: 'emoji', zh: '小图标', type: 'text' },
-      { key: 'pinned', zh: '置顶（同步到首页卡片）', type: 'check' },
+      { key: 'pinned', zh: '置顶（排在动态页最前）', type: 'check' },
       { key: 'url', zh: '公众号文章链接（选填，填了动态直接跳转）', type: 'text' },
       { key: 'draft', zh: '草稿（勾选 = 不公开）', type: 'check' },
     ],
@@ -62,7 +62,6 @@ const SCHEMA: Record<Module, {
       { key: 'location', zh: '活动地点', type: 'text' },
       { key: 'price', zh: '费用', type: 'text' },
       { key: 'qr', zh: '活动群二维码图片路径', type: 'text', hint: '如 /uploads/fall01.png，留空不显示' },
-      { key: 'featured', zh: '上首页展示', type: 'check' },
     ],
   },
 };
@@ -232,7 +231,6 @@ export default function AdminView() {
     const preset: Fields = {};
     for (const f of SCHEMA[mod].fields) preset[f.key] = f.type === 'select' ? f.options?.[0]?.[0] ?? '' : '';
     if (mod === 'news') { preset.date = new Date().toISOString().slice(0, 10); preset.emoji = '💧'; }
-    if (mod === 'sessions') preset.featured = 'false';
     const prefix = SCHEMA[mod].filePrefix?.() ?? '';
     setEditing({ mod, isNew: true, fileName: `${prefix}新内容.md`, data: preset, body: mod === 'news' ? '在这里写正文…' : '' });
   }
