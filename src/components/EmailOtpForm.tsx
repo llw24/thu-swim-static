@@ -65,7 +65,21 @@ export default function EmailOtpForm<T extends PayloadShape>({
       // 只在本地未配邮件服务的开发模式出现，方便调试
       if (d.devCode) setDevHint(t(`（开发模式）验证码：${d.devCode}`, `(dev) code: ${d.devCode}`));
     } catch (e) {
-      setError(friendlyError(e as Error & { status?: number }, t));
+      const err = e as Error & { status?: number };
+      // 频控 429：验证码往往其实已经发出（老站是先写库再发信）。
+      // 直接进入输入验证码界面，避免"收到了码却被拦在第一屏"。
+      if (err.status === 429 || /频繁|次数过多|rate/i.test(err.message || '')) {
+        setSentEmail(composedEmail);
+        setSent(true);
+        setError(
+          t(
+            '发送太频繁：如果刚才收到过验证码，直接在下方输入即可（10 分钟内有效）；没收到请稍等一两分钟再点发送。',
+            'Too many attempts: if you just received a code, enter it below (valid for 10 minutes); otherwise wait a minute and send again.',
+          ),
+        );
+      } else {
+        setError(friendlyError(err, t));
+      }
     } finally {
       setBusy(false);
     }
