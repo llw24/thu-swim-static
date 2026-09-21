@@ -13,19 +13,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 内容文件怎么写
 
-内容全是带 YAML front matter 的 markdown，放 `content/` 对应子目录：
+网站内容现在只有两类（新闻/动态页已下线，日常内容走公众号和微信群）：
 
-- `content/news/*.md` —— 新闻/动态。front matter：`title`（JSON 字符串）、`date`
-  （YYYY-MM-DD）、`summary`、`emoji`、`pinned: true`（置顶：排在动态页最前）、`url`
-  （公众号文章外链，填了列表直接跳外链）、`draft: true`（草稿不公开）；正文为 markdown。
-- `content/sessions/*.md` —— 活动。**只做预告/回顾，没有站内报名**（报名在微信群）。
+- `content/sessions/*.md` —— 活动（预告与回顾，**没有站内报名**，报名在微信群）。
   front matter：`title`、`status: upcoming | closed`、`description`、`schedule`、
-  `location`、`price`、`qr`（活动群二维码路径，一般留空）；
-  正文是详细介绍。⚠️ `open`/`full`/`registerUrl` 已废弃，别再生成。
-- `content/wall/*.md` —— 社区墙外链（现在主要走动态页，较少用）。
-- `content/site.json` —— 全站设置（公告横幅、联系方式、公众号、giscus）。
+  `location`、`price`、`qr`（活动群二维码路径，一般留空）；正文为详细说明（选填）。
+  ⚠️ `open`/`full`/`registerUrl`/`featured` 及一切新闻/社区墙字段已废弃，别再生成。
+- `content/site.json` —— 全站设置（公告横幅、联系方式、giscus）。
 
-文件名：`YYYY-标题-随机后缀.md`，参考既有文件风格；字符串值用 JSON.stringify 写进
+文件名：`标题-随机后缀.md`（如 `新生体验课-m3x9a.md`）；字符串值用 JSON.stringify 写进
 front matter（保证 YAML 安全）。
 
 ## 发布步骤（每次改完内容都要走）
@@ -34,8 +30,7 @@ front matter（保证 YAML 安全）。
    ```bash
    NEXT_PUBLIC_BASE_PATH=/thu-swim-static SITE_URL=https://llw24.github.io/thu-swim-static npm run build
    ```
-   构建失败先看 HANDOFF.md §五的坑（常见：content/news 或 sessions 被删空导致
-   generateStaticParams 报错）。
+   构建失败先看 HANDOFF.md §五的坑。
 2. 提交：`git add content/ && git commit -m "content: 一句话说明"`
 3. 推送（校园网对 github 不稳，失败就重试；用 gh 凭证）：
    ```bash

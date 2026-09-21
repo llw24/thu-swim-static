@@ -8,7 +8,6 @@ import type { SiteSettings } from '@/lib/content-shared';
  * 加入社群页 —— 结构：
  *  ① 验证入群（JoinGate：先验证清华邮箱，验证后才看得到进群方式）
  *  ② Giscus 留言板（GitHub Discussions，配置后自动启用）
- * 公众号内容链接统一放在「动态」页，不再在这里展示。
  */
 export default function CommunityWall({ site }: { site: SiteSettings }) {
   const t = useT();

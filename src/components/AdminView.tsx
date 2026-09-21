@@ -21,7 +21,7 @@ import {
 
 const REPO = process.env.NEXT_PUBLIC_GH_REPO || 'llw24/thu-swim-static';
 
-type Module = 'news' | 'sessions';
+type Module = 'sessions';
 type Tab = Module | 'settings';
 
 type FileMeta = { name: string; path: string; sha: string };
@@ -34,20 +34,6 @@ const SCHEMA: Record<Module, {
   filePrefix?: () => string;
   fields: { key: string; zh: string; type: 'text' | 'textarea' | 'check' | 'select'; options?: [string, string][]; hint?: string }[];
 }> = {
-  news: {
-    label: '新闻',
-    folder: 'content/news',
-    filePrefix: () => new Date().toISOString().slice(0, 10) + '-',
-    fields: [
-      { key: 'title', zh: '标题', type: 'text' },
-      { key: 'date', zh: '日期', type: 'text' },
-      { key: 'summary', zh: '摘要（显示在卡片上）', type: 'text' },
-      { key: 'emoji', zh: '小图标', type: 'text' },
-      { key: 'pinned', zh: '置顶（排在动态页最前）', type: 'check' },
-      { key: 'url', zh: '公众号文章链接（选填，填了动态直接跳转）', type: 'text' },
-      { key: 'draft', zh: '草稿（勾选 = 不公开）', type: 'check' },
-    ],
-  },
   sessions: {
     label: '活动',
     folder: 'content/sessions',
@@ -74,8 +60,6 @@ const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: 
   { key: 'wechatGroupQr', zh: '微信群二维码图片路径（仅作应急方案）', type: 'text', hint: '正常情况下进群方式在老站的 join_info 配置里（见《管理员使用手册》）。这个字段只在验证服务不可用时才会被用到 —— 填了就等于对所有人公开二维码，失去邮箱验证的保护' },
   { key: 'communityIntroZh', zh: '加入社群页介绍 · 中文', type: 'textarea' },
   { key: 'communityIntroEn', zh: '加入社群页介绍 · 英文', type: 'textarea' },
-  { key: 'gzhName', zh: '微信公众号名称（动态页导流）', type: 'text' },
-  { key: 'gzhQr', zh: '公众号二维码图片路径', type: 'text', hint: '图片上传到仓库 public/uploads/ 里，如 /uploads/gzh-qr.png' },
 ];
 
 // ---------------------------------------------------------- 前置元数据解析
@@ -114,10 +98,10 @@ export default function AdminView() {
   const [proof, setProof] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [loginState, setLoginState] = useState<'checking' | 'ok' | 'none'>('checking');
-  const [tab, setTab] = useState<Tab>('news');
+  const [tab, setTab] = useState<Tab>('sessions');
 
   // ---- 内容列表 / 站点设置 / 编辑器
-  const [lists, setLists] = useState<Record<Module, FileMeta[]>>({ news: [], sessions: [] });
+  const [lists, setLists] = useState<Record<Module, FileMeta[]>>({ sessions: [] });
   const [loading, setLoading] = useState(false);
   const [siteData, setSiteData] = useState<Fields>({});
   const [siteRawRef, setSiteRawRef] = useState<Record<string, unknown>>({});
@@ -148,7 +132,7 @@ export default function AdminView() {
   async function refreshAll(pf: string) {
     setLoading(true);
     try {
-      await Promise.all([loadList(pf, 'news'), loadList(pf, 'sessions'), loadSite(pf)]);
+      await Promise.all([loadList(pf, 'sessions'), loadSite(pf)]);
     } catch (e) {
       alert((e as Error).message || '加载失败');
     }
@@ -230,9 +214,8 @@ export default function AdminView() {
   function openNew(mod: Module) {
     const preset: Fields = {};
     for (const f of SCHEMA[mod].fields) preset[f.key] = f.type === 'select' ? f.options?.[0]?.[0] ?? '' : '';
-    if (mod === 'news') { preset.date = new Date().toISOString().slice(0, 10); preset.emoji = '💧'; }
     const prefix = SCHEMA[mod].filePrefix?.() ?? '';
-    setEditing({ mod, isNew: true, fileName: `${prefix}新内容.md`, data: preset, body: mod === 'news' ? '在这里写正文…' : '' });
+    setEditing({ mod, isNew: true, fileName: `${prefix}新内容.md`, data: preset, body: '' });
   }
 
   async function openFile(meta: FileMeta) {
@@ -241,7 +224,7 @@ export default function AdminView() {
     try {
       const d = await adminFile(proof, meta.path);
       const { data, body } = parseFront(d.content);
-      const mod: Module = meta.path.includes('/news/') ? 'news' : 'sessions';
+      const mod: Module = 'sessions';
       setEditing({ mod, isNew: false, fileName: meta.name, sha: d.sha, data, body });
     } catch (e) {
       alert((e as Error).message || '打开失败');
@@ -260,7 +243,6 @@ export default function AdminView() {
     // 字段只保留 schema 里定义的，避免把状态写脏
     const data: Fields = {};
     for (const f of schema.fields) data[f.key] = editing.data[f.key] ?? '';
-    if (!data.date && editing.mod === 'news') data.date = new Date().toISOString().slice(0, 10);
     const text = serializeFront(data, schema.fields, editing.body);
 
     setBusy(true);
@@ -286,7 +268,7 @@ export default function AdminView() {
     try {
       await adminRemove(proof, adminEmail, { path: meta.path, sha: meta.sha });
       alert('✅ 已删除，网站将自动更新。');
-      await loadList(proof, meta.path.includes('/news/') ? 'news' : 'sessions');
+      await loadList(proof, 'sessions');
     } catch (e) {
       alert((e as Error).message || '删除失败');
     }

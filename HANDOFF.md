@@ -10,7 +10,10 @@
 > 老站仅剩 @coze/api→uuid 2 条 moderate，修复需跨大版本升级 Coze SDK，暂缓）；
 > ③老站 devCode 改为只在非生产环境返回（生产未配邮件 = 503，防验证码回显被冒名）；
 > ④静态站 publish workflow 的 Issue 标题注入已修（改走环境变量）；
-> ⑤AGENTS.md 新增「内容更新流程」——管理员现在直接跟 AI 说要发什么，AI 改 content/ 并推送。
+> ⑤AGENTS.md 新增「内容更新流程」——管理员现在直接跟 AI 说要发什么，AI 改 content/ 并推送；
+> ⑥首页删掉「置顶动态」卡片与活动 featured 死字段；**动态页（/news）连同新闻/社区墙
+> 内容模块整体下线**（路由、NewsList、markdown 渲染器、isomorphic-dompurify 依赖、
+> 管理页新闻标签、Issue 模板新闻/社区墙类型全删），首页公告改为纯欢迎语。
 
 ---
 
@@ -36,11 +39,10 @@
 
 | 功能 | 链路 | 说明 |
 |---|---|---|
-| 内容展示 | 静态站 `content/*.md` | 新闻/活动/社区墙，管理员通过 Issue 表单或 `/admin` 维护 |
+| 内容展示 | 静态站 `content/sessions/*.md` | **只有活动一个内容模块**，管理员通过 AI 会话 / Issue 表单 / `/admin` 维护 |
 | **进群验证** | `/join/` → 老站 `/api/auth/request-code` + `/api/join/verify` | 只接受清华邮箱；验证通过才显示企微群二维码（码存老站 `site_settings` 表，不在公开仓库） |
 | **管理页邮箱登录** | `/admin/` → 老站 `/api/admin/verify` + `/api/admin/content` | 清华邮箱 + 白名单（`ADMIN_EMAILS` 环境变量 / `admins` 表 / `SUPER_ADMIN_EMAIL`）→ 7 天凭证；内容读写由老站用 `ADMIN_GITHUB_TOKEN` 代理提交 GitHub |
 | 活动预告 | `/training/`（页面名「活动预告」） | 只做活动介绍：即将开展（可展开详情）+ 往期回顾；**无站内报名**，报名在微信群接龙 |
-| 动态 | `/news/` | 公众号文章链接导流 + 公众号二维码 |
 | AI 小助手 | Coze 悬浮窗 | ⚠️ **静态站上目前是坏的**（`/api/coze/token` 不存在），见 §七 |
 
 ## 三、重要决策史（被否掉的方案，别再重复提议）
@@ -61,7 +63,7 @@
 |---|---|---|
 | 管理员白名单 | ✅ 已配 | `ADMIN_EMAILS=llw24@mails.tsinghua.edu.cn`（Netlify 环境变量）；`admins` 表 + `set-admins.mjs` 脚本也可用 |
 | `ADMIN_GITHUB_TOKEN` | ❓ 待确认 | 用户已按指引在 Netlify 配置并实测保存成功过内容 |
-| **「活动预告」改造** | ⏸ **方案已提出、用户尚未确认开工** | 报名回归微信群；网站改成"活动预告+通知"；删 `/verify` 与问卷星相关；导航改名「活动预告」。详见下节 |
+| **「活动预告」改造** | ✅ 已完成并上线 | 报名回归微信群；/verify 与问卷星相关已删；导航改名「活动预告」 |
 | 企微群二维码接入 | ⏳ 等用户 | 企微「加入群聊」永久码 → 交技术负责人写入老站（`scripts/set-join-settings.mjs --qr=图片`） |
 | 问卷星 | ❌ 已否决 | 报名在群内接龙进行 |
 | Coze AI 助手 | ⚠️ 坏的 | 静态站没有 `/api/coze/token`，SDK 初始化失败（静默）。修复需要老站恢复该接口 + 跨域，或静态注入 token；用户未提出需求 |
@@ -75,7 +77,7 @@
 2. **老站同源时代的老接口没有 CORS 头** —— 任何要被静态站跨域调用的接口，必须用 `lib/join.ts` 的 `jsonCors/preflight`，并加 `export const dynamic = 'force-dynamic'`（防 Netlify 缓存）。
 3. **CORS 拦截不阻止服务端动作** —— 邮件照发、数据照写，只是浏览器拿不到响应。用户会看到"发了码但网站报错"，诊断时别被迷惑。
 4. **`*.vercel.app` 在教育网被 DNS 污染**（多个无关域名同时不可达、解析结果每次不同）；netlify.app 目前可直连。github.com 也间歇性抽风，推送失败要重试并核对远端 SHA。
-5. **content/news 或 sessions 被删空时，`/news/[id]` 构建失败** —— generateStaticParams 空数组在 output:export 下报"无法静态化"。已修（空时返回占位 id，页面渲染 404）。**再清空内容后如果构建失败，先查这里。**
+5. ~~content/news 或 sessions 被删空时，`/news/[id]` 构建失败~~ —— `/news` 路由已整体删除，此坑不存在了；但记住教训：**generateStaticParams 空数组在 output:export 下会构建失败**（见第 8 条）。
 6. **企业微信客户群上限 200 人/群**，「加入群聊」一个码最多带 5 个群（自动建群）；码永不过期。企微**未验证企业**的客户联系功能可用性需实测。
 7. **管理页的凭证存 localStorage**（`tssa_admin_proof`，7 天）。如果用户浏览器禁了站点数据，会"刷新就掉登录"——管理页登录界面现在会显示具体诊断原因（黄色横幅），让用户把文字发回来即可定位。
 8. **Next.js 16 ≠ 记忆里的旧 Next.js**：改代码前读 `node_modules/next/dist/docs/`；`useSearchParams` 会把组件降级成纯客户端渲染（避免使用）；`generateStaticParams` 空数组会构建失败。
@@ -97,7 +99,7 @@ npm run build && npx next start -p 3010                    # localhost:3010
 # 推送（校园网 github 不稳，失败就重试；先老站后静态站）
 git -c credential.helper='!gh auth git-credential' push origin main
 
-# 写入进群二维码 / 报名相关配置（老站）
+# 写入进群二维码等配置（老站）
 export $(grep -h '^DATABASE_URL=' .env.production)
 node scripts/set-join-settings.mjs --qr=二维码.png --wechat=微信号 --note=说明
 

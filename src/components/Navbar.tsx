@@ -24,7 +24,6 @@ export default function Navbar() {
     ['/', { zh: '首页', en: 'Home' }],
     ['/training', { zh: '活动预告', en: 'Events' }],
     ['/community', { zh: '加入社群', en: 'Join Us' }],
-    ['/news', { zh: '动态', en: 'News' }],
     ['/about', { zh: '关于', en: 'About' }],
   ];
 
