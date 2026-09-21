@@ -3,7 +3,6 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { LangProvider } from '@/lib/i18n';
-import CozeChat from '@/components/CozeChat';
 import { getSite, withBase } from '@/lib/content';
 
 const SITE_URL =
@@ -13,12 +12,12 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: '清华大学学生游泳协会 · Tsinghua Swimming Association',
-  description: '清华大学学生游泳协会官方网站 · 活动预告 · 加入社群 · 校园赛事',
+  description: '清华大学学生游泳协会官方网站 · 活动 · 加入社群 · 校园赛事',
   manifest: withBase('/manifest.webmanifest'),
   icons: { icon: withBase('/icon.svg'), apple: withBase('/icon.svg') },
   openGraph: {
     title: '清华大学学生游泳协会',
-    description: '活动预告 · 加入社群 · 校园赛事',
+    description: '活动 · 加入社群 · 校园赛事',
     type: 'website',
     images: [withBase('/og-image.svg')],
   },
@@ -39,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           {children}
           <Footer site={getSite()} />
-          <CozeChat />
         </LangProvider>
       </body>
     </html>

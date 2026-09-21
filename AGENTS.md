@@ -7,7 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- BEGIN:tssa-content-workflow -->
 # 泳协官网 · 内容更新流程（管理员口头交代 → AI 落地）
 
-管理员会直接用自然语言交代网站改动（例：「发一条活动预告：新生游泳体验课，9 月 28 日
+管理员会直接用自然语言交代网站改动（例：「发一条活动：新生游泳体验课，9 月 28 日
 下午两点陈明游泳馆，免费」）。你的任务是把这句话变成 `content/` 下的内容文件并发布。
 《管理员使用手册.md》《网站整体方案.md》《HANDOFF.md》有完整背景，动手前可查阅。
 
