@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useT, useLang } from '@/lib/i18n';
 import EmailOtpForm from './EmailOtpForm';
 import { clearProof, gate, type JoinPayload } from '@/lib/join-api';
-import { withBase } from '@/lib/content-shared';
 import type { SiteSettings } from '@/lib/content-shared';
 
 /**
@@ -28,8 +27,8 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
     };
   }, []);
 
-  // 应急通道：验证服务挂了/还没接入时的兜底提示
-  const emergency = site.contactWechat;
+  // 兜底提示：验证失败 / 群码已满或过期时的应急通道（验证前后常驻显示）
+  const emergency = site.adminWechat;
 
   if (probing) {
     return (
@@ -139,25 +138,14 @@ export default function JoinGate({ site }: { site: SiteSettings }) {
         </div>
       )}
 
-      {/* 验证不可用时的应急通道 */}
-      {!payload && emergency && (
-        <p style={{ marginTop: 14, fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.7 }}>
+      {/* 兜底提示：验证前后常驻显示 */}
+      {emergency && (
+        <p style={{ marginTop: 16, fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.7, borderTop: '1px dashed var(--line)', paddingTop: 12 }}>
           {t(
-            '验证遇到问题？直接联系理事会成员拉你进群：',
-            'Having trouble? Ask a board member to add you directly:',
-          )}{' '}
-          {site.contactWechat}
-          {site.wechatGroupQr && (
-            <>
-              {' · '}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={withBase(site.wechatGroupQr)}
-                alt={t('应急二维码', 'Emergency QR')}
-                style={{ width: 90, verticalAlign: 'middle', borderRadius: 6, border: '1px solid var(--line)' }}
-              />
-            </>
+            '如验证失败或招新群二维码已满或过期，可添加管理员微信：',
+            'If verification fails or the group QR is full or expired, add the admin on WeChat: ',
           )}
+          <b style={{ color: '#333' }}>{emergency}</b>
         </p>
       )}
     </div>

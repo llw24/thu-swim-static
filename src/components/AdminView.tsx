@@ -57,7 +57,7 @@ const SITE_FIELDS: { key: string; zh: string; type: 'text' | 'textarea'; hint?: 
   { key: 'announcement', zh: '首页公告横幅 📢', type: 'textarea', hint: '留空则首页不显示横幅' },
   { key: 'contactEmail', zh: '联系邮箱（页脚）', type: 'text' },
   { key: 'contactWechat', zh: '微信号（页脚 + 社区页）', type: 'text' },
-  { key: 'wechatGroupQr', zh: '微信群二维码图片路径（仅作应急方案）', type: 'text', hint: '正常情况下进群方式在老站的 join_info 配置里（见《管理员使用手册》）。这个字段只在验证服务不可用时才会被用到 —— 填了就等于对所有人公开二维码，失去邮箱验证的保护' },
+  { key: 'adminWechat', zh: '管理员微信号（验证页底部兜底展示）', type: 'text', hint: '验证失败或招新群二维码已满/过期时，提示同学加这个微信' },
   { key: 'communityIntroZh', zh: '加入社群页介绍 · 中文', type: 'textarea' },
   { key: 'communityIntroEn', zh: '加入社群页介绍 · 英文', type: 'textarea' },
 ];

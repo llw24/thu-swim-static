@@ -57,7 +57,8 @@ export type SiteSettings = {
   announcement: string;
   contactEmail: string;
   contactWechat: string;
-  wechatGroupQr: string;
+  /** 验证页底部常驻的管理员微信（验证失败/群码满或过期时的兜底） */
+  adminWechat: string;
   /** 社区墙顶部的微信群二维码/进群说明 */
   communityIntroZh: string;
   communityIntroEn: string;

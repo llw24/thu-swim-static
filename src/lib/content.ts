@@ -72,7 +72,7 @@ export function getSite(): SiteSettings {
     announcement: '',
     contactEmail: '',
     contactWechat: '',
-    wechatGroupQr: '',
+    adminWechat: '',
     communityIntroZh: '',
     communityIntroEn: '',
   };
