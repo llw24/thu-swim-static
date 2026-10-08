@@ -69,8 +69,8 @@ export default function About() {
               'Teaching and Q&A on all strokes. Each lesson covers new ground, with coaching tailored to your level.',
             )} />
             <InfoRow k={t('报名', 'Sign-up')} v={t(
-              '通过群聊内小程序报名，每周两次，分别为每周四下午 3:15–4:30 和周日上午 9:30–10:45。每期只能容纳 20 人左右，实行先到先得的原则，每次通过群聊内小程序进行报名，若报名成功则会有负责人联系。',
-              'Sign up each time via the mini-program in the group chat. Lessons run twice a week — Thursdays 15:15–16:30 and Sundays 9:30–10:45 — with about 20 spots each, first come first served. If you get in, an organizer will contact you.',
+              '通过群聊内小程序报名，每周日上午 9:30–10:45。每次约 20 人，实行先到先得的原则，每次通过群聊内小程序进行报名，若报名成功则会有负责人联系。',
+              'Sign up each time via the mini-program in the group chat. Lessons run on Sundays 9:30–10:45, with about 20 spots each time, first come first served. If you get in, an organizer will contact you.',
             )} />
           </div>
         </div>
